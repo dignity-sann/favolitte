@@ -1,23 +1,56 @@
 <template>
-  <v-app>
-    <v-app-bar app>
-      <v-toolbar-title class="headline text-uppercase">
-        <span>Vuetify</span>
-        <span class="font-weight-light">MATERIAL DESIGN</span>
-      </v-toolbar-title>
+  <v-app id="sandbox">
+    <v-navigation-drawer
+      v-model="primaryDrawer.model"
+      :temporary="true"
+      app
+    />
+
+    <v-app-bar
+      :clipped-left="true"
+      app
+    >
+      <v-app-bar-nav-icon
+        @click.stop="primaryDrawer.model = !primaryDrawer.model"
+      />
+      <v-toolbar-title>fovolitte</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn
-        text
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-      >
-        <span class="mr-2">Latest Release</span>
-      </v-btn>
     </v-app-bar>
 
     <v-content>
-      <router-view/>
+      <v-container fluid>
+        <!-- If using vue-router -->
+        <router-view></router-view>
+        <v-row
+          align="center"
+          justify="center"
+        >
+          <v-col cols="10">
+            <v-card>
+              <v-card-text>
+                <v-row>
+                  <v-col
+                    cols="12"
+                    md="6"
+                  >
+                    <span>Scheme</span>
+                    <v-switch
+                      v-model="$vuetify.theme.dark"
+                      primary
+                      label="Dark"
+                    />
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
     </v-content>
+
+    <v-footer app>
+      <span class="px-4">&copy; {{ new Date().getFullYear() }}</span>
+    </v-footer>
   </v-app>
 </template>
 
@@ -29,7 +62,9 @@ export default Vue.extend({
   components: {
   },
   data: () => ({
-    //
+    primaryDrawer: {
+      model: null,
+    }
   }),
 });
 </script>
