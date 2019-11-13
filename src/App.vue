@@ -1,10 +1,46 @@
 <template>
-  <v-app id="sandbox">
+  <v-app id="app">
     <v-navigation-drawer
       v-model="primaryDrawer.model"
-      :temporary="true"
+      temporary
       app
-    />
+    >
+      <v-list dense>
+        <v-subheader>Menu</v-subheader>
+        <v-list-item
+          v-for="item in items"
+          :key="item.title"
+          :to="item.path"
+          link
+        >
+          <v-list-item-icon>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>
+              {{ item.title }}
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+
+      <v-list dense>
+        <v-subheader>Settings</v-subheader>
+        <v-list-item>
+          <v-list-item-action>
+            <v-checkbox
+              v-model="$vuetify.theme.dark"
+            ></v-checkbox>
+          </v-list-item-action>
+
+          <v-list-item-content>
+            <v-list-item-title>Darkmode</v-list-item-title>
+            <v-list-item-subtitle>画面を暗くするよ</v-list-item-subtitle>
+          </v-list-item-content>
+          </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
     <v-app-bar
       :clipped-left="true"
@@ -21,35 +57,24 @@
       <v-container fluid>
         <!-- If using vue-router -->
         <router-view></router-view>
-        <v-row
-          align="center"
-          justify="center"
-        >
-          <v-col cols="10">
-            <v-card>
-              <v-card-text>
-                <v-row>
-                  <v-col
-                    cols="12"
-                    md="6"
-                  >
-                    <span>Scheme</span>
-                    <v-switch
-                      v-model="$vuetify.theme.dark"
-                      primary
-                      label="Dark"
-                    />
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
       </v-container>
     </v-content>
 
-    <v-footer app>
-      <span class="px-4">&copy; {{ new Date().getFullYear() }}</span>
+    <v-footer
+      padless
+      app
+    >
+      <v-row
+        justify="center"
+        no-gutters
+      >
+        <v-col
+          class="py-1 text-center"
+          cols="12"
+        >
+          {{ new Date().getFullYear() }} — <strong>Vuetify</strong>
+        </v-col>
+      </v-row>
     </v-footer>
   </v-app>
 </template>
@@ -64,7 +89,24 @@ export default Vue.extend({
   data: () => ({
     primaryDrawer: {
       model: null,
-    }
+    },
+    items: [
+      {
+        title: 'Home',
+        icon: 'home',
+        path: '/'
+      },
+      {
+        title: 'twitter見るやつ',
+        icon: 'cake',
+        path: '/twitter'
+      },
+      {
+        title: 'About',
+        icon: 'info',
+        path: '#'
+      },
+    ],
   }),
 });
 </script>
