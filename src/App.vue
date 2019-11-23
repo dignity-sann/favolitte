@@ -112,10 +112,11 @@ export default Vue.extend({
         order: 10
       },
       {
-        title: '認証(twitter OAuth)',
+        title: 'Signin',
+        description: 'Twitterの認証だよ',
         icon: 'info',
-        path: '/',
-        order: -1
+        path: '/signin',
+        order: 20
       },
       {
         title: 'リスト作成',
