@@ -6,21 +6,29 @@ import store from './store'
 import vuetify from './plugins/vuetify';
 import axios from 'axios'
 import VueAxios from 'vue-axios'
-import Firebase from 'firebase'
 
-Firebase.initializeApp({
-  apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
-  authDomain: "favolitte.firebaseapp.com",
-  databaseURL: "https://favolitte.firebaseio.com",
-  projectId: "favolitte",
-  storageBucket: "favolitte.appspot.com",
-  messagingSenderId: "219894010770",
-  appId: "1:219894010770:web:87bdc58f910e495924674b",
-  measurementId: "G-E18QH1VKG6"
-})
+import Firebase from './firebase'
+Firebase.init()
 
 Vue.config.productionTip = false
 Vue.use(VueAxios, axios)
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(rec => rec.meta.requiresAuth)){
+    // 認証必要メニュー
+    if (!store.getters.isSignedIn) {
+      // ユーザ認証なし
+      Firebase.signin();
+      next({
+        path: '/home'
+      })
+    }
+    next()
+  } else {
+    // 認証不要メニュー
+    next()
+  }
+})
 
 new Vue({
   router,

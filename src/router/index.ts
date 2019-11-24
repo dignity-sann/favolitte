@@ -2,7 +2,6 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '@/components/pages/Home.vue'
 import TwitterView from '@/components/pages/TwitterView.vue'
-import Signin from '@/components/pages/Signin.vue'
 
 Vue.use(VueRouter)
 
@@ -17,17 +16,10 @@ const routes = [
     name: 'Twitter',
     component: TwitterView,
     meta: {
-      icon: '[fab, twitter]'
+      icon: '[fab, twitter]',
+      requiresAuth: true
     }
   },
-  {
-    path: '/signin',
-    name: 'signin',
-    component: Signin,
-    meta: {
-      icon: '[fab, twitter]'
-    }
-  }
 ]
 
 const router = new VueRouter({
