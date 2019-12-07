@@ -51,7 +51,7 @@ export default {
     const userInfo = await user.getUser(this.$store.getters.user.providerData[0].uid)
     console.log(userInfo)
     console.log("start: fetch favolites list")
-    this.tweets = await axios
+    const favolist = await axios
       .get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
         params: {
           endpoint: "favorites/list",
@@ -60,6 +60,7 @@ export default {
           }
         }
       });
+    this.tweets = await favolist.data
     console.log(this.tweets)
     console.log("finish")
   }
