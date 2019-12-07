@@ -13,10 +13,11 @@
     <v-row>
       <v-col cols="6">
         <h3>Create group</h3>
-        <form>
+        <v-form ref="form" v-model="valid" lazy-validation>
           <v-text-field
             v-model="groupName"
             label="Group name"
+            :rules="groupNameRules"
             :error-messages="errors.groupName"
             :counter="20"
             required
@@ -25,12 +26,13 @@
             outlined
             v-model="groupDesc"
             label="Description"
+            :rules="groupDescRules"
             :error-messages="errors.groupDesc"
             :counter="120"
             class="mt-2"
           ></v-textarea>
           <v-btn class="primary" @click="addGroup" :rounded="true">create</v-btn>
-        </form>
+        </v-form>
       </v-col>
 
       <!-- add group form on right section -->
@@ -40,7 +42,7 @@
         </h3>
         <div class="mt-4">
           <v-card class="mx-auto" tile>
-            <v-list-item-group v-model="item" color="primary">
+            <v-list-item-group color="primary">
               <v-list-item v-for="group of groups" :key="group.id" @click="open">
                 <v-list-item-content>
                   <v-list-item-title>{{group.name}}</v-list-item-title>
@@ -60,7 +62,16 @@ export default {
   data() {
     return {
       groupName: "",
+      groupNameRules: [
+        v => !!v || "Group name is required",
+        v => (v && v.length <= 20) || "Name must be less than 20 characters"
+      ],
       groupDesc: "",
+      groupDescRules: [
+        v => !!v || "Group name is required",
+        v => (v && v.length <= 120) || "Description must be less than 120 characters"
+      ],
+      valid: true,
       errors: {
         groupName: "",
         groupDesc: ""
@@ -96,10 +107,15 @@ export default {
   },
   methods: {
     addGroup: function() {
-      const id = this.groups.length + 1;
-      this.groups.push({ id: id, name: this.groupName, desc: this.groupDesc });
-      this.groupName = "";
-      this.groupDesc = "";
+      if (this.$refs.form.validate()) {
+        const id = this.groups.length + 1;
+        this.groups.push({
+          id: id,
+          name: this.groupName,
+          desc: this.groupDesc
+        });
+        this.$refs.form.reset();
+      }
     },
     open: function() {
       // show group details
