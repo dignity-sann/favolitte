@@ -44,7 +44,7 @@ export default {
     };
   },
   mounted() {
-    axios.get("/api/tw/favolites/list").then(res => (this.tweets = res.data));
+    axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/favolites/list`).then(res => (this.tweets = res.data));
   }
 };
 </script>
