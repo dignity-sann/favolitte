@@ -35,15 +35,19 @@
 
       <!-- add group form on right section -->
       <v-col cols="6">
-        <h3><v-icon>list</v-icon> Groups</h3>
+        <h3>
+          <v-icon class="mr-1">list</v-icon>Groups
+        </h3>
         <div class="mt-4">
           <v-card class="mx-auto" tile>
-            <v-list-item v-for="group of groups" :key="group.id">
-              <v-list-item-content>
-                <v-list-item-title>{{group.name}}</v-list-item-title>
-                <v-list-item-subtitle>{{group.desc}}</v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
+            <v-list-item-group v-model="item" color="primary">
+              <v-list-item v-for="group of groups" :key="group.id" @click="open">
+                <v-list-item-content>
+                  <v-list-item-title>{{group.name}}</v-list-item-title>
+                  <v-list-item-subtitle>{{group.desc}}</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
           </v-card>
         </div>
       </v-col>
@@ -93,9 +97,12 @@ export default {
   methods: {
     addGroup: function() {
       const id = this.groups.length + 1;
-      this.groups.push({id:id, name:this.groupName, desc:this.groupDesc})
-      this.groupName = ""
-      this.groupDesc = ""
+      this.groups.push({ id: id, name: this.groupName, desc: this.groupDesc });
+      this.groupName = "";
+      this.groupDesc = "";
+    },
+    open: function() {
+      // show group details
     }
   }
 };
