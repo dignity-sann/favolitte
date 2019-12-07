@@ -40,7 +40,8 @@ import axios from "axios";
 export default {
   data() {
     return {
-      tweets: []
+      tweets: [],
+      show: false
     };
   },
   mounted() {
