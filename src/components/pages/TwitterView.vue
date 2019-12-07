@@ -52,7 +52,7 @@ export default {
       await console.log('start: fetch favolites list')
       await axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
         params: {
-          endpoint: 'favolites/list',
+          endpoint: 'favorites/list',
           param: {
             screen_name: userInfo.screen_name
           }
