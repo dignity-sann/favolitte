@@ -33,15 +33,23 @@ export default Vue.extend({
     menus: [
       {
         title: 'Home',
+        description: 'App home',
         icon: 'home',
         path: '/',
         order: 0
       },
       {
-        title: 'test',
-        description: 'test',
-        icon: 'work',
+        title: 'Twitter',
+        description: 'Twitter favorites list view',
+        icon: 'insert_photo',
         path: '/twitter',
+        order: 10
+      },
+      {
+        title: 'Manage - group',
+        description: 'Managing of group',
+        icon: 'face',
+        path: '/manage/group',
         order: 10
       },
       {
