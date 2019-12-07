@@ -47,7 +47,8 @@ export default {
   },
   async mounted() {
     console.log("start: fetch userInfo")
-    const userInfo = await user.getUser("4891294393")
+    console.log(this.$store.getters.user.providerData[0].uid)
+    const userInfo = await user.getUser(this.$store.getters.user.providerData[0].uid)
     console.log(userInfo)
     console.log("start: fetch favolites list")
     this.tweets = await axios
