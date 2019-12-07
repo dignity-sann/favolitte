@@ -5,7 +5,6 @@
       temporary
       app
     >
-      <Account></Account>
       <v-divider></v-divider>
       <MenuList></MenuList>
       <SettingsList></SettingsList>
@@ -20,6 +19,7 @@
       />
       <v-toolbar-title>fovolitte</v-toolbar-title>
       <v-spacer></v-spacer>
+      <Account></Account>
     </v-app-bar>
 
     <v-content>
