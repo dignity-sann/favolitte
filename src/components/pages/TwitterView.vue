@@ -36,6 +36,7 @@
 
 <script>
 import axios from "axios";
+import  * as user from "./../../core/tw-user";
 
 export default {
   data() {
@@ -44,8 +45,21 @@ export default {
       show: false
     };
   },
-  mounted() {
-    axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/favolites/list`).then(res => (this.tweets = res.data));
+  async mounted() {
+      console.log('start: fetch userInfo')
+      const userInfo = await user.getUser('4891294393');
+      console.log(userInfo)
+      await console.log('start: fetch favolites list')
+      await axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
+        params: {
+          endpoint: 'favolites/list',
+          param: {
+            screen_name: userInfo.screen_name
+          }
+        }
+      }).then(res => (this.tweets = res.data));
+      await console.log('finish')
+    
   }
 };
 </script>
