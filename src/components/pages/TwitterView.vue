@@ -31,38 +31,53 @@
         </div>
       </v-expand-transition>
     </v-card>
+    <infinite-loading v-if="userInfo !== null" @infinite="infiniteHandler"></infinite-loading>
   </div>
 </template>
 
 <script>
 import axios from "axios";
 import * as user from "./../../core/tw-user";
+import InfiniteLoading from 'vue-infinite-loading';
 
 export default {
+  components: {
+    InfiniteLoading,
+  },
   data() {
     return {
       tweets: [],
-      show: false
+      show: false,
+      userInfo: null,
+      maxId: null
     };
   },
   async mounted() {
     console.log("start: fetch userInfo")
     console.log(this.$store.getters.user.providerData[0].uid)
-    const userInfo = await user.getUser(this.$store.getters.user.providerData[0].uid)
-    console.log(userInfo)
-    console.log("start: fetch favolites list")
-    const favolist = await axios
-      .get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
-        params: {
+    this.userInfo = await user.getUser(this.$store.getters.user.providerData[0].uid)
+    console.log(this.userInfo)
+    console.log("finish")
+  },
+  methods: {
+    infiniteHandler($state) {
+      let params = {
           endpoint: "favorites/list",
           param: {
-            screen_name: userInfo.data.screen_name
+            screen_name: this.userInfo.data.screen_name,
           }
-        }
+      }
+      if (this.tweets.length > 0) {
+        params.param['max_id'] = this.maxId
+      }
+      axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
+        params: params
+      }).then((res) => {
+        this.tweets.push(...res.data);
+        this.maxId = res.data[res.data.length - 1].id
+        $state.loaded();
       });
-    this.tweets = await favolist.data
-    console.log(this.tweets)
-    console.log("finish")
+    },
   }
 };
 </script>
