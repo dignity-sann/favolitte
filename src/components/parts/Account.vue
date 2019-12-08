@@ -1,10 +1,9 @@
 <template>
   <div class="text-center">
     <v-menu
-      v-model="menu"
       :close-on-content-click="false"
       :nudge-width="200"
-      offset-x
+      offset-y
     >
       <template v-slot:activator="{ on }">
         <v-btn
@@ -12,7 +11,7 @@
           icon
           v-on="on"
         >
-          <v-avatar color="indigo" size="36" @click="on">
+          <v-avatar color="indigo" size="36">
             <v-icon dark v-if="!$store.getters.isSignedIn">mdi-account-circle</v-icon>
             <img v-else
               :src="$store.getters.user.photoURL"
@@ -26,7 +25,8 @@
         <v-list>
           <v-list-item>
             <v-list-item-avatar v-if="$store.getters.isSignedIn">
-              <img
+              <v-icon dark v-if="!$store.getters.isSignedIn">mdi-account-circle</v-icon>
+              <img v-else
                 :src="$store.getters.user.photoURL"
                 :alt="$store.getters.user.displayName"
               >
@@ -35,6 +35,9 @@
               <v-list-item-title>{{ $store.getters.user.displayName }}</v-list-item-title>
               <v-list-item-subtitle>Account IDを載せたい</v-list-item-subtitle>
             </v-list-item-content>
+            <v-list-item-content v-if="!$store.getters.isSignedIn">
+              <v-list-item-title>Sign in required</v-list-item-title>
+            </v-list-item-content>
           </v-list-item>
         </v-list>
 
@@ -42,12 +45,11 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-
           <v-btn v-if="!$store.getters.isSignedIn" text @click="signin()" color="primary">
-            サインイン
+            Sign in
           </v-btn>
           <v-btn v-if="$store.getters.isSignedIn" text @click="signout()" color="primary">
-            サインアウト
+            Sign Out
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -62,7 +64,6 @@ import axios from 'axios'
 export default {
   data(){
     return {
-      menu: []
     }
   },
   methods: {
