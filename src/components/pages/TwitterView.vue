@@ -61,10 +61,12 @@ export default {
   },
   methods: {
     infiniteHandler($state) {
+      const count = 20
       let params = {
           endpoint: "favorites/list",
           param: {
             screen_name: this.userInfo.data.screen_name,
+            count: count + 1
           }
       }
       if (this.tweets.length > 0) {
@@ -73,8 +75,9 @@ export default {
       axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
         params: params
       }).then((res) => {
-        this.tweets.push(...res.data);
         this.maxId = res.data[res.data.length - 1].id
+        res.data.pop
+        this.tweets.push(...res.data);
         $state.loaded();
       });
     },
