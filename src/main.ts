@@ -20,7 +20,7 @@ router.beforeEach((to, from, next) => {
       // ユーザ認証なし
       Firebase.signin();
       next({
-        path: '/home'
+        path: '/'
       })
     }
     next()

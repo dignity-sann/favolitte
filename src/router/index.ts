@@ -17,7 +17,6 @@ const routes = [
     name: 'Twitter',
     component: TwitterView,
     meta: {
-      icon: '[fab, twitter]',
       requiresAuth: true
     }
   },

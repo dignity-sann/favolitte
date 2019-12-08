@@ -52,13 +52,6 @@ export default Vue.extend({
         path: '/manage/group',
         order: 10
       },
-      {
-        title: 'リスト作成',
-        description: '共有できるリストを作成',
-        icon: 'info',
-        path: '/',
-        order: -1
-      },
     ],
   }),
   methods: {
