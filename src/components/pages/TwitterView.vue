@@ -37,7 +37,6 @@
 
 <script>
 import axios from "axios";
-import * as user from "./../../core/tw-user";
 import InfiniteLoading from 'vue-infinite-loading';
 
 export default {
@@ -55,7 +54,7 @@ export default {
   async mounted() {
     console.log("start: fetch userInfo")
     console.log(this.$store.getters.user.providerData[0].uid)
-    this.userInfo = await user.getUser(this.$store.getters.user.providerData[0].uid)
+    this.userInfo = this.$store.getters.userTw
     console.log(this.userInfo)
     console.log("finish")
   },
