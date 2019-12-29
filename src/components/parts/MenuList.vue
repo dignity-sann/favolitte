@@ -50,7 +50,14 @@ export default Vue.extend({
         description: 'Managing of group',
         icon: 'face',
         path: '/manage/group',
-        order: 10
+        order: 20
+      },
+      {
+        title: 'Fav Summery',
+        description: 'Favolitte list group view',
+        icon: 'list',
+        path: '/fav',
+        order: 30
       },
     ],
   }),

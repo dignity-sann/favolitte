@@ -1,5 +1,6 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
+import 'firebase/firestore';
 import store from "./store";
 import axios from "axios";
 
@@ -54,7 +55,7 @@ export default {
       }
     });
   },
-  database() {
-    return firebase.database()
+  firestore() {
+    return firebase.firestore()
   }
 };
