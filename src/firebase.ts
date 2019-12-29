@@ -1,6 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import store from "./store";
+import axios from "axios";
 
 export default {
   init() {
@@ -24,13 +25,36 @@ export default {
     firebase.auth().signOut()
   },
   onAuth() {
-    firebase.auth().onAuthStateChanged(user => {
-      store.commit('onAuthStateChanged', user);
-      if (user) {
-        store.commit('onUserStatusChanged', true);
-      } else {
+    firebase.auth().onAuthStateChanged(async user => {
+      if (!user) {
+        store.commit('onAuthStateChanged', null);
         store.commit('onUserStatusChanged', false);
+        store.commit('onUserTwChanged', null);
+      } else {
+        store.commit('onAuthStateChanged', user);
+        store.commit('onUserStatusChanged', true);
+        if (user.providerData.length > 0) {
+          const userInfo: (firebase.UserInfo | null) = user.providerData[0]
+          let uid = ''
+          if (userInfo !== null) {
+            uid = userInfo.uid
+          }
+          const twuser: any = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
+            params: {
+                endpoint: 'users/show',
+                param: {
+                    user_id: uid
+                }
+            }
+          })
+          store.commit('onUserTwChanged', twuser);
+        } else {
+          store.commit('onUserTwChanged', null);
+        }
       }
     });
+  },
+  database() {
+    return firebase.database()
   }
 };

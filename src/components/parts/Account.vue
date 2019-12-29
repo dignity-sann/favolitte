@@ -33,7 +33,7 @@
             </v-list-item-avatar>
             <v-list-item-content v-if="$store.getters.isSignedIn">
               <v-list-item-title>{{ $store.getters.user.displayName }}</v-list-item-title>
-              <v-list-item-subtitle>Account IDを載せたい</v-list-item-subtitle>
+              <v-list-item-subtitle>{{ '@'.concat($store.getters.userTw.data.screen_name) }}</v-list-item-subtitle>
             </v-list-item-content>
             <v-list-item-content v-if="!$store.getters.isSignedIn">
               <v-list-item-title>Sign in required</v-list-item-title>

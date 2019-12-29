@@ -6,6 +6,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     user: {},
+    userTw: {},
     status: false
   },
   mutations: {
@@ -13,10 +14,14 @@ export default new Vuex.Store({
       // firebaseが返したユーザー情報
       state.user = user;
     },
+    onUserTwChanged(state, userTw) {
+      // twitteのユーザー情報
+      state.userTw = userTw;
+    },
     onUserStatusChanged(state, status) {
       // ログインしてるかどうか true or false
       state.status = status;
-    }
+    },
   },
   getters: {
     user(state) {
@@ -24,6 +29,9 @@ export default new Vuex.Store({
     },
     isSignedIn(state) {
       return state.status;
-    }
+    },
+    userTw(state) {
+      return state.userTw;
+    },
   }
 })
