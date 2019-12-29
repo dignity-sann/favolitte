@@ -23,22 +23,23 @@
 
       <v-card>
         <v-list>
-          <v-list-item>
-            <v-list-item-avatar v-if="$store.getters.isSignedIn">
-              <v-icon dark v-if="!$store.getters.isSignedIn">mdi-account-circle</v-icon>
-              <img v-else
-                :src="$store.getters.user.photoURL"
-                :alt="$store.getters.user.displayName"
+          <v-list-item v-if="$store.getters.isSignedIn && $store.getters.userTw !== null">
+            <v-list-item-avatar>
+              <img
+                :src="$store.getters.userTw.data.profile_image_url"
+                :alt="'@'.concat($store.getters.userTw.data.screen_name)"
               >
             </v-list-item-avatar>
-            <v-list-item-content v-if="$store.getters.isSignedIn">
-              <v-list-item-title>{{ $store.getters.user.displayName }}</v-list-item-title>
+            <v-list-item-content>
+              <v-list-item-title>{{ $store.getters.userTw.data.name }}</v-list-item-title>
               <v-list-item-subtitle>{{ '@'.concat($store.getters.userTw.data.screen_name) }}</v-list-item-subtitle>
             </v-list-item-content>
-            <v-list-item-content v-if="!$store.getters.isSignedIn">
+          </v-list-item>
+          <v-list-item v-else>
+            <v-list-item-content>
               <v-list-item-title>Sign in required</v-list-item-title>
             </v-list-item-content>
-          </v-list-item>
+          </v-list-item> 
         </v-list>
 
         <v-divider></v-divider>
