@@ -20,42 +20,64 @@
     <v-row>
       <v-col
         cols='4'
-        v-for="tw of tweets"
-        :key="tw.id"
+        v-for="(tw, index) in filterOnlyImage()"
+        :key="index"
       >
-        <v-card class="mx-auto tw-card" max-width="600">
-          <v-img v-if="tw.entities.media" :src="tw.entities.media[0].media_url" height="800px"></v-img>
-
-          <v-card-title>{{tw.user.name}}</v-card-title>
-
-          <v-card-subtitle>{{tw.text}}</v-card-subtitle>
-
+        <v-card
+          class="mx-auto tw-card"
+          max-width="600"
+          @click="showModal(tw.entities.media[0].media_url)"
+        >
+          <v-img
+            :src="tw.entities.media[0].media_url"
+            max-width="1200"
+            max-height="800"
+          >
+            <template v-slot:placeholder>
+              <v-row
+                class="fill-height ma-0"
+                align="center"
+                justify="center"
+              >
+                <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
+              </v-row>
+            </template>
+          </v-img>
           <v-card-actions>
-            <v-list-item-avatar color="grey darken-3">
-              <v-img class="elevation-6" :src="tw.user.profile_image_url"></v-img>
-            </v-list-item-avatar>
+            <v-list-item class="grow">
+              <v-list-item-avatar color="grey darken-3">
+                <v-img
+                  class="elevation-6"
+                  :src="tw.user.profile_image_url"
+                >
+                </v-img>
+              </v-list-item-avatar>
 
-            <v-btn text>Share</v-btn>
+              <v-list-item-content>
+                <v-list-item-title>{{ tw.user.name }}</v-list-item-title>
+              </v-list-item-content>
 
-            <v-btn color="purple" text>Explore</v-btn>
-
-            <v-spacer></v-spacer>
-
-            <v-btn icon @click="show = !show">
-              <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-            </v-btn>
+              <v-row
+                align="center"
+                justify="end"
+              >
+                <v-btn icon>
+                  <v-icon class="mr-1">mdi-heart</v-icon>
+                </v-btn>
+                <span class="subheading mr-2">{{ tw.favorite_count }}</span>
+                <span class="mr-1"></span>
+                <v-btn icon>
+                  <v-icon class="mr-1">mdi-twitter-retweet</v-icon>
+                </v-btn>
+                <span class="subheading">{{ tw.retweet_count }}</span>
+              </v-row>
+            </v-list-item>
           </v-card-actions>
-
-          <v-expand-transition>
-            <div v-show="show">
-              <v-divider></v-divider>
-              <v-card-text>I'm a thing. But, like most politicians, he promised more than he could deliver. You won't have time for sleeping, soldier, not with all the bed making you'll be doing. Then we'll go with that data file! Hey, you add a one and two zeros to that or we walk! You're going to do his laundry? I've got to find a way to escape.</v-card-text>
-            </div>
-          </v-expand-transition>
         </v-card>
       </v-col>
       <infinite-loading @infinite="infiniteHandler"></infinite-loading>
     </v-row>
+    <OriginalImageDialog ref="modal"></OriginalImageDialog>
   </div>
 </template>
 
@@ -63,11 +85,13 @@
 import axios from "axios";
 import InfiniteLoading from 'vue-infinite-loading';
 import firebase from '@/firebase.ts'
+import OriginalImageDialog from '@/components/parts/OriginalImageDialog.vue';
 
 export default {
   name: 'FavSummery',
   components: {
     InfiniteLoading,
+    OriginalImageDialog,
   },
   data() {
     return {
@@ -78,9 +102,13 @@ export default {
       maxId: null
     };
   },
-  mounted() {
+  async mounted() {
     const firestore = firebase.firestore()
-    firestore.collection('users').doc(this.$store.getters.userTw.data.screen_name).get()
+    // firestore requests
+    firestore
+      .collection('users')
+      .doc(this.$store.getters.userTw.data.screen_name)
+      .get()
       .then((documentSnapshot) => {
         console.log(documentSnapshot)
         console.log(documentSnapshot.data())
@@ -92,48 +120,49 @@ export default {
             state: false
           })
         })
-      }
-    )
-    const count = 20
-    let params = {
-        endpoint: "favorites/list",
-        param: {
-          screen_name: this.$store.getters.userTw.data.screen_name,
-          count: count + 1
-        }
-    }
-    if (this.tweets.length > 0) {
-      params.param['max_id'] = this.maxId
-    }
-    axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
-      params: params
-    }).then((res) => {
-      this.maxId = res.data[res.data.length - 1].id
-      res.data.pop
-      this.tweets.push(...res.data);
-    });
+      })
+    // initial data
+    await this.fetchData(this.$store.getters.userTw.data.screen_name)
+      .then((res) => {
+        this.maxId = res.data[res.data.length - 1].id
+        res.data.pop
+        this.tweets.push(...res.data);
+      })
   },
   methods: {
     infiniteHandler($state) {
+      this.fetchData(this.$store.getters.userTw.data.screen_name)
+        .then((res) => {
+          this.maxId = res.data[res.data.length - 1].id
+          res.data.pop
+          this.tweets.push(...res.data);
+          $state.loaded();
+        })
+    },
+    async fetchData(screenName) {
       const count = 20
       let params = {
           endpoint: "favorites/list",
           param: {
-            screen_name: this.$store.getters.userTw.data.screen_name,
+            screen_name: screenName,
             count: count + 1
           }
       }
+      // すでにデータが存在
       if (this.tweets.length > 0) {
         params.param['max_id'] = this.maxId
       }
-      axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
+      return axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call/mock`, {
         params: params
-      }).then((res) => {
-        this.maxId = res.data[res.data.length - 1].id
-        res.data.pop
-        this.tweets.push(...res.data);
-        $state.loaded();
-      });
+      })
+    },
+    filterOnlyImage() {
+      return this.tweets.filter((v) => {
+        return (v.entities.media) && v.entities.media.length > 0
+      })
+    },
+    showModal(imageUrl) {
+      this.$refs.modal.showModal(imageUrl)
     },
   }
 };
