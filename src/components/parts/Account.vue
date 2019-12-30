@@ -23,11 +23,10 @@
 
       <v-card>
         <v-list>
-          <v-list-item v-if="$store.getters.isSignedIn && $store.getters.userTw !== null">
+          <v-list-item v-if="$store.getters.isSignedIn && $store.getters.userTw.data">
             <v-list-item-avatar>
               <img
                 :src="$store.getters.userTw.data.profile_image_url"
-                :alt="'@'.concat($store.getters.userTw.data.screen_name)"
               >
             </v-list-item-avatar>
             <v-list-item-content>
@@ -58,21 +57,23 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import firebase from '@/firebase.ts'
-import axios from 'axios'
 
 export default {
+  name: 'Account',
   data(){
     return {
     }
   },
   methods: {
-    signin: function () {
-      firebase.signin();
+    signin: async function () {
+      await firebase.signin();
+      this.$emit('showMessage', 'signin success.')
     },
-    signout: function() {
-      firebase.signout();
+    signout: async function() {
+      await firebase.signout();
+      this.$emit('showMessage', 'signout uccess.')
     },
   },
   created: function() {

@@ -17,15 +17,22 @@
       <v-app-bar-nav-icon
         @click.stop="primaryDrawer.model = !primaryDrawer.model"
       />
-      <v-toolbar-title>fovolitte</v-toolbar-title>
+      <v-toolbar-title>favolitte</v-toolbar-title>
       <v-spacer></v-spacer>
-      <Account></Account>
+      <Account
+        @showMessage="showMessage"
+      ></Account>
     </v-app-bar>
 
     <v-content>
       <v-container fluid>
         <!-- If using vue-router -->
-        <router-view></router-view>
+        <!-- commponet間のsnackbar連携がダサい・・・直して・・・ -->
+        <router-view
+          @showMessage="showMessage"
+        >
+        </router-view>
+        <SnackBar ref="snackbar"></SnackBar>
       </v-container>
     </v-content>
 
@@ -48,11 +55,12 @@
   </v-app>
 </template>
 
-<script lang="ts">
+<script>
 import Vue from 'vue';
 import Account from '@/components/parts/Account.vue';
 import MenuList from '@/components/parts/MenuList.vue';
 import SettingsList from '@/components/parts/SettingsList.vue';
+import SnackBar from '@/components/parts/SnackBar.vue';
 
 export default Vue.extend({
   name: 'App',
@@ -60,13 +68,19 @@ export default Vue.extend({
     MenuList,
     SettingsList,
     Account,
+    SnackBar,
   },
-  data: () => ({
-    primaryDrawer: {
-      model: null,
-    },
-  }),
+  data () {
+    return {
+      primaryDrawer: {
+        model: null,
+      }
+    }
+  },
   methods: {
+    showMessage(message) {
+      this.$refs.snackbar.showMessage(message)
+    }
   },
 });
 </script>

@@ -18,11 +18,11 @@ export default {
     });
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
   },
-  signin() {
+  async signin() {
     const provider = new firebase.auth.TwitterAuthProvider()
     firebase.auth().signInWithPopup(provider);
   },
-  signout() {
+  async signout() {
     firebase.auth().signOut()
   },
   onAuth() {
