@@ -19,7 +19,7 @@
     <v-divider></v-divider>
     <v-row>
       <v-col
-        cols='4'
+        lg='2' md='3' sm='6' xs='12'
         v-for="(tw, index) in filterOnlyImage()"
         :key="index"
       >
