@@ -27,7 +27,7 @@
     <v-content>
       <v-container fluid>
         <!-- If using vue-router -->
-        <!-- commponet間のsnackbar連携がダサい・・・直して・・・ -->
+        <!-- TODO commponet間のsnackbar連携がダサい・・・直して・・・ -->
         <router-view
           @showMessage="showMessage"
         >
