@@ -2,9 +2,11 @@
   <v-dialog
     v-model="dialog"
   >
-    <v-card class="d-flex">
+    <v-card>
       <v-img
         :src="imageUrl"
+        aspect-ratio="1"
+        contain
       >
         <template v-slot:placeholder>
           <v-row

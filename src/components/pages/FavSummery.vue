@@ -21,17 +21,17 @@
       <v-col
         lg='2' md='3' sm='6' xs='12'
         v-for="(tw, index) in filterOnlyImage()"
+        class="d-flex child-flex"
         :key="index"
       >
         <v-card
           class="mx-auto tw-card"
-          max-width="600"
-          @click="showModal(tw.entities.media[0].media_url)"
         >
           <v-img
             :src="tw.entities.media[0].media_url"
-            max-width="1200"
-            max-height="800"
+            class="d-flex"
+            height="360"
+            @click="showModal(tw.entities.media[0].media_url)"
           >
             <template v-slot:placeholder>
               <v-row
@@ -43,33 +43,61 @@
               </v-row>
             </template>
           </v-img>
-          <v-card-actions>
-            <v-list-item class="grow">
-              <v-list-item-avatar color="grey darken-3">
+          <v-card-actions class="ma-0 pa-0">
+            <v-list-item class="grow px-3">
+              <v-list-item-avatar color="grey darken-3 mx-1">
                 <v-img
                   class="elevation-6"
                   :src="tw.user.profile_image_url"
                 >
                 </v-img>
               </v-list-item-avatar>
-
-              <v-list-item-content>
-                <v-list-item-title>{{ tw.user.name }}</v-list-item-title>
+              <v-list-item-content class="ml-2">
+                <v-list-item-title class="caption text-truncate">
+                  <span
+                    class="d-inline-block text-truncate"
+                    style="max-width: 150px;"
+                  >
+                    {{ tw.user.name }}
+                  </span>
+                </v-list-item-title>
+                <v-list-item-subtitle class="caption">
+                  <span
+                    class="d-inline-block text-truncate"
+                    style="max-width: 150px;"
+                  >
+                    {{ '@'.concat(tw.user.screen_name) }}
+                  </span>
+                </v-list-item-subtitle>
               </v-list-item-content>
-
+            </v-list-item>  
+          </v-card-actions>
+          <v-divider/>
+          <v-card-actions class="">
+            <v-list-item class="grow">
               <v-row
                 align="center"
                 justify="end"
               >
-                <v-btn icon>
-                  <v-icon class="mr-1">mdi-heart</v-icon>
+                <v-btn icon @click="doPushFav(tw.id_str)">
+                  <v-icon
+                    class="mr-1"
+                    small
+                  >
+                    mdi-heart
+                  </v-icon>
                 </v-btn>
-                <span class="subheading mr-2">{{ tw.favorite_count }}</span>
+                <span class="caption mr-2" v-text="tw.favorite_count"></span>
                 <span class="mr-1"></span>
-                <v-btn icon>
-                  <v-icon class="mr-1">mdi-twitter-retweet</v-icon>
+                <v-btn icon @click="doPushRetweet(tw.id_str)">
+                  <v-icon
+                    class="mr-1"
+                    small
+                  >
+                    mdi-twitter-retweet
+                  </v-icon>
                 </v-btn>
-                <span class="subheading">{{ tw.retweet_count }}</span>
+                <span class="caption" v-text="tw.retweet_count"></span>
               </v-row>
             </v-list-item>
           </v-card-actions>
@@ -163,6 +191,20 @@ export default {
     },
     showModal(imageUrl) {
       this.$refs.modal.showModal(imageUrl)
+    },
+    async doPushFav(tweetId) {
+      console.log(`doPushFav tweetid => ${tweetId}`)
+      axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call/post`, {
+        params: {
+          endpoint: "favorites/create",
+          param: {
+            id: tweetId
+          }
+        }
+      })
+    },
+    async doPushRetweet(tweetId) {
+      console.log(`doPushRetweet tweetid => ${tweetId}`)
     },
   }
 };
