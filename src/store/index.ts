@@ -7,6 +7,8 @@ export default new Vuex.Store({
   state: {
     user: {},
     userTw: {},
+    userTwAcessToken: '',
+    userTwTokenSecret: '',
     status: false
   },
   mutations: {
@@ -22,6 +24,12 @@ export default new Vuex.Store({
       // ログインしてるかどうか true or false
       state.status = status;
     },
+    onUserTwAcessTokenChanged(state, userTwAcessToken) {
+      state.userTwAcessToken = userTwAcessToken;
+    },
+    onUserTwTokenSecretChanged(state, userTwTokenSecret) {
+      state.userTwTokenSecret = userTwTokenSecret;
+    },
   },
   getters: {
     user(state) {
@@ -32,6 +40,12 @@ export default new Vuex.Store({
     },
     userTw(state) {
       return state.userTw;
+    },
+    userTwAcessToken(state) {
+      return state.userTwAcessToken;
+    },
+    userTwTokenSecret(state) {
+      return state.userTwTokenSecret;
     },
   }
 })

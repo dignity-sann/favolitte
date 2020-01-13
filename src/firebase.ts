@@ -16,11 +16,18 @@ export default {
       appId: process.env.VUE_APP_FIREBASE_APP_ID,
       measurementId: process.env.VUE_APP_FIREBASE_MEASUREMENT_ID
     });
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+    // TODO 下のonAuth()に統合できればSession有効期間も変更可能（現状はログイン時のフックでしか、トークンが取れないので・・・）
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
   },
   async signin() {
     const provider = new firebase.auth.TwitterAuthProvider()
-    firebase.auth().signInWithPopup(provider);
+    firebase.auth().signInWithPopup(provider).then(function(result: any) {
+      if (result.credential) {
+        // TODO これいやです。onAuth()に統合したい
+        store.commit('onUserTwAcessTokenChanged', result.credential.accessToken);
+        store.commit('onUserTwTokenSecretChanged', result.credential.secret);
+      }
+    });
   },
   async signout() {
     firebase.auth().signOut()
@@ -31,6 +38,8 @@ export default {
         store.commit('onAuthStateChanged', null);
         store.commit('onUserStatusChanged', false);
         store.commit('onUserTwChanged', null);
+        store.commit('onUserTwAcessTokenChanged', '');
+        store.commit('onUserTwTokenSecretChanged', '');
       } else {
         store.commit('onAuthStateChanged', user);
         store.commit('onUserStatusChanged', true);
