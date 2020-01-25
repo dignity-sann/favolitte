@@ -69,11 +69,17 @@ export default {
   methods: {
     signin: async function () {
       await firebase.signin();
-      this.$emit('showMessage', 'signin success.')
+      this.$emit('showMessage', {
+        message: 'Success.',
+        color: 'success'
+      })
     },
     signout: async function() {
       await firebase.signout();
-      this.$emit('showMessage', 'signout uccess.')
+      this.$emit('showMessage', {
+        message: 'Success.',
+        color: 'success'
+      })
     },
   },
   created: function() {

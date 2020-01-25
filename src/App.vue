@@ -27,12 +27,10 @@
     <v-content>
       <v-container fluid>
         <!-- If using vue-router -->
-        <!-- TODO commponet間のsnackbar連携がダサい・・・直して・・・ -->
         <router-view
           @showMessage="showMessage"
         >
         </router-view>
-        <SnackBar ref="snackbar"></SnackBar>
       </v-container>
     </v-content>
 
@@ -52,6 +50,12 @@
         </v-col>
       </v-row>
     </v-footer>
+    <SnackBar
+      :message="message"
+      :dummy="dummy"
+      :color="color"
+    >
+    </SnackBar>
   </v-app>
 </template>
 
@@ -74,12 +78,23 @@ export default Vue.extend({
     return {
       primaryDrawer: {
         model: null,
-      }
+      },
+      message: '',
+      dummy: '',
+      color: ''
     }
   },
   methods: {
-    showMessage(message) {
-      this.$refs.snackbar.showMessage(message)
+    showMessage(type) {
+      if (type.message) {
+        this.message = type.message
+      }
+      if (type.color) {
+        this.color = type.color
+      } else {
+        this.color = 'info'
+      }
+      this.dummy = Date.now()
     }
   },
 });
