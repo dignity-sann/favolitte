@@ -3,7 +3,7 @@
     <v-row justify="space-around" align="center">
       <v-col cols="12">
         <v-chip
-          v-for="(group, index) in groups"
+          v-for="(group, index) in myGroups"
           :key="index"
           :input-value="group.state"
           color="primary"
@@ -20,7 +20,7 @@
     <v-row>
       <v-col
         lg='2' md='3' sm='6' xs='12'
-        v-for="(tw, index) in filterOnlyImage()"
+        v-for="(tw, index) in filterOnlyImageAndSort()"
         class="d-flex child-flex"
         :key="index"
       >
@@ -79,7 +79,11 @@
                 align="center"
                 justify="end"
               >
-                <v-btn icon @click="doPushFav(tw.id_str)">
+                <v-btn
+                  icon
+                  @click="doPushFav(tw.id_str, myFavs.some(v => v === tw.id_str))"
+                  :color="myFavs.some(v => v === tw.id_str) ? 'pink' : ''"
+                >
                   <v-icon
                     class="mr-1"
                     small
@@ -88,7 +92,7 @@
                   </v-icon>
                 </v-btn>
                 <span class="caption mr-2" v-text="tw.favorite_count"></span>
-                <span class="mr-1"></span>
+                <!-- <span class="mr-1"></span>
                 <v-btn icon @click="doPushRetweet(tw.id_str)">
                   <v-icon
                     class="mr-1"
@@ -97,13 +101,13 @@
                     mdi-twitter-retweet
                   </v-icon>
                 </v-btn>
-                <span class="caption" v-text="tw.retweet_count"></span>
+                <span class="caption" v-text="tw.retweet_count"></span> -->
               </v-row>
             </v-list-item>
           </v-card-actions>
         </v-card>
       </v-col>
-      <infinite-loading @infinite="infiniteHandler"></infinite-loading>
+      <infinite-loading v-if="isPageNation" @infinite="infiniteHandler"></infinite-loading>
     </v-row>
     <OriginalImageDialog ref="modal"></OriginalImageDialog>
   </div>
@@ -123,43 +127,79 @@ export default {
   },
   data() {
     return {
-      user: {},
-      groups: [],
+      userIds: [],
+      myGroups: [],
+      myFavs: [],
+      groupInnerUsers:[],
       tweets: [],
       show: false,
-      maxId: null
+      maxId: null,
+      isPageNation: false
     };
   },
   async mounted() {
     const firestore = firebase.firestore()
-    // firestore requests
-    firestore
+    // get my group 
+    await firestore
       .collection('users')
-      .doc(this.$store.getters.userTw.data.screen_name)
+      .doc(this.$store.getters.userTw.data.id_str)
       .get()
       .then((documentSnapshot) => {
-        console.log(documentSnapshot)
-        console.log(documentSnapshot.data())
-        this.user = documentSnapshot.data()
-        this.user.groups.forEach(group => {
-          console.log(group)
-          this.groups.push({
+        documentSnapshot.data().groups.forEach(group => {
+          this.myGroups.push({
             name: group,
             state: false
           })
         })
       })
-    // initial data
-    await this.fetchData(this.$store.getters.userTw.data.screen_name)
-      .then((res) => {
-        this.maxId = res.data[res.data.length - 1].id
-        res.data.pop
-        this.tweets.push(...res.data);
+
+    // get group inner user
+    await firestore
+      .collection('users')
+      .where('groups', 'array-contains-any', this.myGroups.map(v => v.name))
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          const user = {
+            user_id: doc.id,
+            groups: doc.data().groups
+          }
+          this.groupInnerUsers.push(user)
+        })
       })
+
+    // initial group tweet data
+    for (const user of this.groupInnerUsers) {
+      const param = {
+        user_id: user.user_id,
+        count: 40
+      }
+      await this.fetchDataNoPageNation(param)
+        .then((res) => {
+          this.tweets.push(...res.data);
+        })
+    }
+    // initial group tweet tweetid min, max
+    const min = this.tweets.reduce((a, b) => a.id > b.id ? b : a).id_str
+    const max = this.tweets.reduce((a, b) => a.id > b.id ? a : b).id_str
+
+    // my tweet data
+    const param = {
+      user_id: this.$store.getters.userTw.data.id_str,
+      since_id: min,
+      max_id: max,
+      count: 200
+    }
+    await this.fetchDataNoPageNation(param)
+      .then((res) => {
+        this.myFavs.push(...res.data.map(v => v.id_str));
+      })
+    console.log(max)
+    console.log(min)
   },
   methods: {
     infiniteHandler($state) {
-      this.fetchData(this.$store.getters.userTw.data.screen_name)
+      this.fetchData(this.$store.getters.userTw.data.id_str)
         .then((res) => {
           this.maxId = res.data[res.data.length - 1].id
           res.data.pop
@@ -167,12 +207,14 @@ export default {
           $state.loaded();
         })
     },
-    async fetchData(screenName) {
-      const count = 20
+    async fetchData(userId) {
+      const count = 50
       let params = {
           endpoint: "favorites/list",
+          access_token: this.$store.getters.userTwAcessToken,
+          token_secret: this.$store.getters.userTwTokenSecret,
           param: {
-            screen_name: screenName,
+            user_id: screenName,
             count: count + 1
           }
       }
@@ -184,28 +226,74 @@ export default {
         params: params
       })
     },
-    filterOnlyImage() {
+   async fetchDataNoPageNation(param) {
+      let params = {
+          endpoint: "favorites/list",
+          access_token: this.$store.getters.userTwAcessToken,
+          token_secret: this.$store.getters.userTwTokenSecret,
+          param: param
+      }
+      return axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
+        params: params
+      })
+    },
+    filterOnlyImageAndSort() {
       return this.tweets.filter((v) => {
         return (v.entities.media) && v.entities.media.length > 0
+      }).sort((a, b) => {
+        if (new Date(a.created_at).getTime() < new Date(b.created_at).getTime()) {
+          return 1
+        } else if (new Date(a.created_at).getTime() > new Date(b.created_at).getTime()) {
+          return -1
+        } else {
+          return 0
+        } 
       })
     },
     showModal(imageUrl) {
       this.$refs.modal.showModal(imageUrl)
     },
-    async doPushFav(tweetId) {
+    async doPushFav(tweetId, state) {
       console.log(`doPushFav tweetid => ${tweetId}`)
-      axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call/post`, {
-        params: {
-          endpoint: "favorites/create",
-          param: {
-            id: tweetId
+      if (!state) {
+        await axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call/post`, {
+          params: {
+            endpoint: "favorites/create",
+            access_token: this.$store.getters.userTwAcessToken,
+            token_secret: this.$store.getters.userTwTokenSecret,
+            param: {
+              id: tweetId
+            }
           }
-        }
-      })
+        })
+        this.myFavs.push(tweetId)
+        this.$emit('showMessage', {
+          message: 'イイねした',
+          color: 'info'
+        })
+      } else {
+        await axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call/post`, {
+          params: {
+            endpoint: "favorites/destroy",
+            access_token: this.$store.getters.userTwAcessToken,
+            token_secret: this.$store.getters.userTwTokenSecret,
+            param: {
+              id: tweetId
+            }
+          }
+        })
+        this.myFavs = this.myFavs.filter(v => {
+          return v !== tweetId
+        })
+        this.$emit('showMessage', {
+          message: 'イイねやめた',
+          color: 'info'
+        })
+      }
     },
-    async doPushRetweet(tweetId) {
-      console.log(`doPushRetweet tweetid => ${tweetId}`)
-    },
+    // async doPushRetweet(tweetId) {
+    //   console.log(`doPushRetweet tweetid => ${tweetId}`)
+    // },
   }
 };
 </script>
