@@ -63,6 +63,8 @@ export default {
       const count = 20
       let params = {
           endpoint: "favorites/list",
+          access_token: this.$store.getters.userTwAcessToken,
+          token_secret: this.$store.getters.userTwTokenSecret,
           param: {
             screen_name: this.userInfo.data.screen_name,
             count: count + 1

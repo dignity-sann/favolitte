@@ -51,10 +51,12 @@ export default {
           }
           const twuser: any = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
             params: {
-                endpoint: 'users/show',
-                param: {
-                    user_id: uid
-                }
+              access_token: store.getters.userTwAcessToken,
+              token_secret: store.getters.userTwTokenSecret,    
+              endpoint: 'users/show',
+              param: {
+                user_id: uid
+              }
             }
           })
           store.commit('onUserTwChanged', twuser);
