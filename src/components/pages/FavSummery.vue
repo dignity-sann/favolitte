@@ -85,7 +85,6 @@
                   :color="myFavs.some(v => v === tw.id_str) ? 'pink' : ''"
                 >
                   <v-icon
-                    class="mr-1"
                     small
                   >
                     mdi-heart
@@ -267,10 +266,6 @@ export default {
           }
         })
         this.myFavs.push(tweetId)
-        this.$emit('showMessage', {
-          message: 'イイねした',
-          color: 'info'
-        })
       } else {
         await axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call/post`, {
           params: {
@@ -284,10 +279,6 @@ export default {
         })
         this.myFavs = this.myFavs.filter(v => {
           return v !== tweetId
-        })
-        this.$emit('showMessage', {
-          message: 'イイねやめた',
-          color: 'info'
         })
       }
     },

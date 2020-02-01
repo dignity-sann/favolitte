@@ -5,7 +5,7 @@
       v-model="snackbar"
       :timeout="timeout"
     >
-      {{ showMessage }}
+      <span v-html="showMessage"></span>
     </v-snackbar>
   </div>
 </template>
@@ -21,7 +21,7 @@
     data () {
       return {
         snackbar: false,
-        timeout: 5000,
+        timeout: 2000,
       }
     },
     computed: {
