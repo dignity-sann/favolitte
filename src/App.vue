@@ -5,48 +5,9 @@
       temporary
       app
     >
-      <v-list dense>
-        <v-subheader>Menu</v-subheader>
-        <v-list-item
-          v-for="(item, index) in filtering()"
-          :key="index"
-          :to="item.path"
-          link
-        >
-          <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-icon>
-
-          <v-list-item-content>
-            <v-list-item-title>
-              {{ item.title }}
-            </v-list-item-title>
-            <v-list-item-subtitle>
-              {{ item.description }}
-            </v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-
-      <v-list dense>
-        <v-subheader>Settings</v-subheader>
-        <v-list-item>
-          <v-list-item-action>
-            <v-checkbox
-              v-model="$vuetify.theme.dark"
-            ></v-checkbox>
-          </v-list-item-action>
-
-          <v-list-item-content>
-            <v-list-item-title>
-              Darkmode
-            </v-list-item-title>
-            <v-list-item-subtitle>
-              画面を暗くするよ
-            </v-list-item-subtitle>
-          </v-list-item-content>
-          </v-list-item>
-      </v-list>
+      <v-divider></v-divider>
+      <MenuList></MenuList>
+      <SettingsList></SettingsList>
     </v-navigation-drawer>
 
     <v-app-bar
@@ -56,14 +17,20 @@
       <v-app-bar-nav-icon
         @click.stop="primaryDrawer.model = !primaryDrawer.model"
       />
-      <v-toolbar-title>fovolitte</v-toolbar-title>
+      <v-toolbar-title>favolitte</v-toolbar-title>
       <v-spacer></v-spacer>
+      <Account
+        @showMessage="showMessage"
+      ></Account>
     </v-app-bar>
 
     <v-content>
       <v-container fluid>
         <!-- If using vue-router -->
-        <router-view></router-view>
+        <router-view
+          @showMessage="showMessage"
+        >
+        </router-view>
       </v-container>
     </v-content>
 
@@ -79,66 +46,55 @@
           class="py-1 text-center"
           cols="12"
         >
-          {{ new Date().getFullYear() }} — <strong>Vuetify</strong>
+          {{ new Date().getFullYear() }} — <strong>favolitte</strong>
         </v-col>
       </v-row>
     </v-footer>
+    <SnackBar
+      :message="message"
+      :dummy="dummy"
+      :color="color"
+    >
+    </SnackBar>
   </v-app>
 </template>
 
-<script lang="ts">
+<script>
 import Vue from 'vue';
+import Account from '@/components/parts/Account.vue';
+import MenuList from '@/components/parts/MenuList.vue';
+import SettingsList from '@/components/parts/SettingsList.vue';
+import SnackBar from '@/components/parts/SnackBar.vue';
 
 export default Vue.extend({
   name: 'App',
   components: {
+    MenuList,
+    SettingsList,
+    Account,
+    SnackBar,
   },
-  data: () => ({
-    primaryDrawer: {
-      model: null,
-    },
-    menus: [
-      {
-        title: 'Home',
-        icon: 'home',
-        path: '/',
-        order: 0
+  data () {
+    return {
+      primaryDrawer: {
+        model: null,
       },
-      {
-        title: 'test',
-        description: 'test',
-        icon: 'work',
-        path: '/twitter',
-        order: 10
-      },
-      {
-        title: '認証(twitter OAuth)',
-        icon: 'info',
-        path: '/',
-        order: -1
-      },
-      {
-        title: 'リスト作成',
-        description: '共有できるリストを作成',
-        icon: 'info',
-        path: '/',
-        order: -1
-      },
-    ],
-  }),
+      message: '',
+      dummy: '',
+      color: ''
+    }
+  },
   methods: {
-    filtering: function () {
-      return this.menus.filter((menu) => {
-        return menu.order !== undefined && menu.order !== -1
-      }).sort((a, b) => {
-        if (a.order > b.order) {
-          return 1
-        } else if (a.order < b.order) {
-          return -1
-        } else {
-          return 0
-        }
-      })
+    showMessage(type) {
+      if (type.message) {
+        this.message = type.message
+      }
+      if (type.color) {
+        this.color = type.color
+      } else {
+        this.color = 'info'
+      }
+      this.dummy = Date.now()
     }
   },
 });

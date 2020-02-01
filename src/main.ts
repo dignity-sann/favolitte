@@ -7,8 +7,28 @@ import vuetify from './plugins/vuetify';
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 
-Vue.use(VueAxios, axios)
+import Firebase from './firebase'
+Firebase.init()
+
 Vue.config.productionTip = false
+Vue.use(VueAxios, axios)
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(rec => rec.meta.requiresAuth)){
+    // 認証必要メニュー
+    if (!store.getters.isSignedIn) {
+      // ユーザ認証なし
+      Firebase.signin();
+      next({
+        path: '/'
+      })
+    }
+    next()
+  } else {
+    // 認証不要メニュー
+    next()
+  }
+})
 
 new Vue({
   router,

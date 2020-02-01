@@ -2,6 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '@/components/pages/Home.vue'
 import TwitterView from '@/components/pages/TwitterView.vue'
+import Group from '@/components/pages/manage/Group.vue'
+import FavSummery from '@/components/pages/FavSummery.vue'
 
 Vue.use(VueRouter)
 
@@ -16,8 +18,18 @@ const routes = [
     name: 'Twitter',
     component: TwitterView,
     meta: {
-      icon: '[fab, twitter]'
+      requiresAuth: true
     }
+  },
+  {
+    path: '/manage/group',
+    name: 'Manage | group',
+    component: Group
+  },
+  {
+    path: '/fav',
+    name: 'fav',
+    component: FavSummery
   }
 ]
 
