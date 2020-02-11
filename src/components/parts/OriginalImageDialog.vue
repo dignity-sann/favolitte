@@ -4,9 +4,8 @@
   >
     <v-card>
       <v-img
-        :src="imageUrl"
-        aspect-ratio="1"
-        contain
+        v-if="medias.length === 1"
+        :src="medias[0].media_url"
       >
         <template v-slot:placeholder>
           <v-row
@@ -18,6 +17,28 @@
           </v-row>
         </template>
       </v-img>
+      <v-carousel
+        v-if="medias.length > 1"
+        :show-arrows="false"
+      >
+        <v-carousel-item
+          v-for="(media, index) in medias" :key="index"
+        >
+          <v-img
+            :src="media.media_url"
+          >
+            <template v-slot:placeholder>
+              <v-row
+                class="fill-height ma-0"
+                align="center"
+                justify="center"
+              >
+                <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
+              </v-row>
+            </template>
+          </v-img>
+        </v-carousel-item>
+      </v-carousel>
     </v-card>
   </v-dialog>
 </template>
@@ -27,13 +48,13 @@
     data () {
       return {
         dialog: false,
-        imageUrl: '',
+        medias: [],
       }
     },
     methods: {
-      showModal (imageUrl) {
+      showModal (medias) {
         this.dialog = true
-        this.imageUrl = imageUrl
+        this.medias = medias
       }
     }
   }
