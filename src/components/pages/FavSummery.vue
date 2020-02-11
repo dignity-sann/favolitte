@@ -17,7 +17,7 @@
       </v-col>
     </v-row>
     <v-divider></v-divider>
-    <v-row>
+    <v-row v-if="!isLoading">
       <v-col
         lg='2' md='3' sm='6' xs='12'
         v-for="(tw, index) in filterOnlyImageAndSort()"
@@ -28,10 +28,11 @@
           class="mx-auto tw-card"
         >
           <v-img
-            :src="tw.entities.media[0].media_url"
+            v-if="tw.extended_entities.media.length === 1"
+            :src="tw.extended_entities.media[0].media_url"
             class="d-flex"
             height="360"
-            @click="showModal(tw.entities.media[0].media_url)"
+            @click="showModal(tw.entities.media)"
           >
             <template v-slot:placeholder>
               <v-row
@@ -43,6 +44,32 @@
               </v-row>
             </template>
           </v-img>
+          <v-carousel
+            v-if="tw.extended_entities.media.length > 1"
+            :show-arrows="false"
+            height="360"
+          >
+            <v-carousel-item
+              v-for="(media, index) in tw.extended_entities.media" :key="index"
+            >
+              <v-img
+                :src="media.media_url"
+                class="d-flex"
+                height="360"
+                @click="showModal(tw.extended_entities.media)"
+              >
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+            </v-carousel-item>
+          </v-carousel>
           <v-card-actions class="ma-0 pa-0">
             <v-list-item class="grow px-3">
               <v-list-item-avatar color="grey darken-3 mx-1">
@@ -109,6 +136,9 @@
       <infinite-loading v-if="isPageNation" @infinite="infiniteHandler"></infinite-loading>
     </v-row>
     <OriginalImageDialog ref="modal"></OriginalImageDialog>
+    <v-overlay :value="isLoading">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
   </div>
 </template>
 
@@ -133,10 +163,12 @@ export default {
       tweets: [],
       show: false,
       maxId: null,
-      isPageNation: false
+      isPageNation: false,
+      isLoading: true
     };
   },
   async mounted() {
+    this.isLoading = true
     const firestore = firebase.firestore()
     // get my group 
     await firestore
@@ -178,6 +210,18 @@ export default {
           this.tweets.push(...res.data);
         })
     }
+
+    // initial tweet distinct
+    const tmp = this.tweets.reduce((acc, cur, index) => {
+      if (acc.length === 0) {
+        acc.push(cur)
+      } else if (!acc.some(v => v.id_str === cur.id_str)) {
+        acc.push(cur)
+      }
+      return acc
+    }, [])
+    this.tweets = tmp
+
     // initial group tweet tweetid min, max
     const min = this.tweets.reduce((a, b) => a.id > b.id ? b : a).id_str
     const max = this.tweets.reduce((a, b) => a.id > b.id ? a : b).id_str
@@ -193,8 +237,7 @@ export default {
       .then((res) => {
         this.myFavs.push(...res.data.map(v => v.id_str));
       })
-    console.log(max)
-    console.log(min)
+    this.isLoading = false
   },
   methods: {
     infiniteHandler($state) {
@@ -249,8 +292,8 @@ export default {
         } 
       })
     },
-    showModal(imageUrl) {
-      this.$refs.modal.showModal(imageUrl)
+    showModal(media) {
+      this.$refs.modal.showModal(media)
     },
     async doPushFav(tweetId, state) {
       console.log(`doPushFav tweetid => ${tweetId}`)
