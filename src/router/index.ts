@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '@/components/pages/Home.vue'
 import TwitterView from '@/components/pages/TwitterView.vue'
-import Group from '@/components/pages/manage/Group.vue'
+import Group from '@/components/pages/Group.vue'
 import FavSummery from '@/components/pages/FavSummery.vue'
 
 Vue.use(VueRouter)
