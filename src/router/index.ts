@@ -2,7 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '@/components/pages/Home.vue'
 import TwitterView from '@/components/pages/TwitterView.vue'
-import Group from '@/components/pages/manage/Group.vue'
+import Group from '@/components/pages/Group.vue'
+import JoinGroup from '@/components/pages/JoinGroup.vue'
 import FavSummery from '@/components/pages/FavSummery.vue'
 
 Vue.use(VueRouter)
@@ -22,12 +23,17 @@ const routes = [
     }
   },
   {
-    path: '/manage/group',
+    path: '/fav/create',
     name: 'Manage | group',
     component: Group
   },
   {
-    path: '/fav',
+    path: '/fav/join',
+    name: 'Manage | join',
+    component: JoinGroup
+  },
+  {
+    path: '/fav/watch',
     name: 'fav',
     component: FavSummery
   }
