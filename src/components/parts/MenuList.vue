@@ -39,24 +39,24 @@ export default Vue.extend({
         order: 0
       },
       {
-        title: 'Twitter',
-        description: 'Twitter favorites list view',
-        icon: 'insert_photo',
-        path: '/twitter',
-        order: 10
-      },
-      {
-        title: 'Manage - group',
-        description: 'Managing of group',
-        icon: 'face',
-        path: '/manage/group',
+        title: 'create favlist',
+        description: 'favlist creating',
+        icon: 'create',
+        path: '/fav/create',
         order: 20
       },
       {
-        title: 'Fav Summery',
-        description: 'Favolitte list group view',
+        title: 'join favlist',
+        description: 'created favlist join',
+        icon: 'settings',
+        path: '/fav/join',
+        order: 20
+      },
+      {
+        title: 'watch fav',
+        description: 'fav list watch view',
         icon: 'list',
-        path: '/fav',
+        path: '/fav/watch',
         order: 30
       },
     ],
