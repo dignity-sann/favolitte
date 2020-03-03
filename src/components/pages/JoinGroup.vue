@@ -129,63 +129,68 @@ export default {
     }
   },
   async mounted () {
-    const firestore = firebase.firestore()
-    // get my group
-    let listIds = []
-    await firestore
-      .collection('users')
-      .doc(this.$store.getters.userTw.data.id_str)
-      .get()
-      .then((documentSnapshot) => {
-        if (documentSnapshot.data()) {
-          listIds = documentSnapshot.data().list_ids
-        }
-      })
-
-    // get joined group
-    for (const listId of listIds) {
+    try {
+      this.isLoading = true
+      const firestore = firebase.firestore()
+      // get my group
+      let listIds = []
       await firestore
-        .collection('lists')
-        .doc(listId)
+        .collection('users')
+        .doc(this.$store.getters.userTw.data.id_str)
         .get()
         .then((documentSnapshot) => {
-          this.joinGroups.push(documentSnapshot.data())
-          this.joinGroups[this.joinGroups.length -1].id = listId
+          if (documentSnapshot.data()) {
+            listIds = documentSnapshot.data().list_ids
+          }
         })
-    }
-    let temp = []
-    // get my group
-    await firestore
-      .collection('lists')
-      .where('creater_id', '==', this.$store.getters.userTw.data.id_str)
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {  
-          temp.push(doc.data())
-          temp[temp.length -1].id = doc.id
-        })
-      })
-    // get public group
-    await firestore
-      .collection('lists')
-      .where('is_public_list', '==', true)
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {  
-          temp.push(doc.data())
-          temp[temp.length -1].id = doc.id
-        })
-      })
-    // initial tweet distinct
-    const tmp = temp.reduce((acc, cur, index) => {
-      if (acc.length === 0) {
-        acc.push(cur)
-      } else if (!acc.some(v => v.id === cur.id)) {
-        acc.push(cur)
+
+      // get joined group
+      for (const listId of listIds) {
+        await firestore
+          .collection('lists')
+          .doc(listId)
+          .get()
+          .then((documentSnapshot) => {
+            this.joinGroups.push(documentSnapshot.data())
+            this.joinGroups[this.joinGroups.length -1].id = listId
+          })
       }
-      return acc
-    }, [])
-    this.selectGroups = tmp
+      let temp = []
+      // get my group
+      await firestore
+        .collection('lists')
+        .where('creater_id', '==', this.$store.getters.userTw.data.id_str)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {  
+            temp.push(doc.data())
+            temp[temp.length -1].id = doc.id
+          })
+        })
+      // get public group
+      await firestore
+        .collection('lists')
+        .where('is_public_list', '==', true)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {  
+            temp.push(doc.data())
+            temp[temp.length -1].id = doc.id
+          })
+        })
+      // initial tweet distinct
+      const tmp = temp.reduce((acc, cur, index) => {
+        if (acc.length === 0) {
+          acc.push(cur)
+        } else if (!acc.some(v => v.id === cur.id)) {
+          acc.push(cur)
+        }
+        return acc
+      }, [])
+      this.selectGroups = tmp
+    } finally {
+      this.isLoading = false
+    } 
   },
   methods: {
     joinedList: function (group) {

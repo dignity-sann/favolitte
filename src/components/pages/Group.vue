@@ -296,40 +296,45 @@ export default {
     },
   },
   async mounted () {
-    const firestore = firebase.firestore()
-    let temp = []
-    // get my group
-    await firestore
-      .collection('lists')
-      .where('creater_id', '==', this.$store.getters.userTw.data.id_str)
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {  
-          temp.push(doc.data())
-          temp[temp.length -1].id = doc.id
+    try {
+      this.isLoading = true
+      const firestore = firebase.firestore()
+      let temp = []
+      // get my group
+      await firestore
+        .collection('lists')
+        .where('creater_id', '==', this.$store.getters.userTw.data.id_str)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {  
+            temp.push(doc.data())
+            temp[temp.length -1].id = doc.id
+          })
         })
-      })
-    // get public group
-    await firestore
-      .collection('lists')
-      .where('is_public_list', '==', true)
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {  
-          temp.push(doc.data())
-          temp[temp.length -1].id = doc.id
+      // get public group
+      await firestore
+        .collection('lists')
+        .where('is_public_list', '==', true)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {  
+            temp.push(doc.data())
+            temp[temp.length -1].id = doc.id
+          })
         })
-      })
-    // initial tweet distinct
-    const tmp = temp.reduce((acc, cur, index) => {
-      if (acc.length === 0) {
-        acc.push(cur)
-      } else if (!acc.some(v => v.id === cur.id)) {
-        acc.push(cur)
-      }
-      return acc
-    }, [])
-    this.groups = tmp
+      // initial tweet distinct
+      const tmp = temp.reduce((acc, cur, index) => {
+        if (acc.length === 0) {
+          acc.push(cur)
+        } else if (!acc.some(v => v.id === cur.id)) {
+          acc.push(cur)
+        }
+        return acc
+      }, [])
+      this.groups = tmp
+    } finally {
+      this.isLoading = false
+    } 
   },
   methods: {
     removeConfirm: function (id) {
