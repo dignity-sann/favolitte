@@ -25,17 +25,26 @@ const routes = [
   {
     path: '/fav/create',
     name: 'Manage | group',
-    component: Group
+    component: Group,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/fav/join',
     name: 'Manage | join',
-    component: JoinGroup
+    component: JoinGroup,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/fav/watch',
     name: 'fav',
-    component: FavSummery
+    component: FavSummery,
+    meta: {
+      requiresAuth: true
+    }
   }
 ]
 

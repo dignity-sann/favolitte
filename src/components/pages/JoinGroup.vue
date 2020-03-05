@@ -3,8 +3,8 @@
     <!-- top section -->
     <v-row>
       <v-col cols="12">
-        <h2>Join FavList</h2>
-        <p class='d-none d-md-flex'>Created groups for monitoring your favorites. Add your favorite users &#x1f389;</p>
+        <h2>アクティブリスト設定</h2>
+        <p class='d-none d-md-flex'>自分が見たいリストを設定しましょう&#x1f389;</p>
       </v-col>
     </v-row>
 
@@ -13,7 +13,7 @@
       color="primary"
       @click="updateList()"
     >
-      update
+      更新
     </v-btn>
     <v-row>
       <v-col cols='6'>
@@ -21,7 +21,7 @@
           <v-card class="mx-auto" outlined>
             <v-list-item-group color="primary">
               <v-subheader>
-                <v-icon class="mr-1">list</v-icon>Select FavList
+                <v-icon class="mr-1">list</v-icon>選択可能なイイねウォッチリスト
               </v-subheader>
               <v-list-item
                 v-for="group of selectGroups"
@@ -55,7 +55,7 @@
           <v-card class="mx-auto" outlined>
             <v-list-item-group color="primary">
               <v-subheader>
-                <v-icon class="mr-1">list</v-icon>Joined FavList
+                <v-icon class="mr-1">list</v-icon>アクティブイイねウォッチリスト
               </v-subheader>
               <v-list-item
                 v-for="group of joinGroups"
@@ -88,7 +88,7 @@
           <v-card class="mx-auto" outlined>
             <v-list-item-group color="primary">
               <v-subheader>
-                <v-icon class="mr-1">list</v-icon>Members
+                <v-icon class="mr-1">list</v-icon>リスト内のユーザー
               </v-subheader>
               <v-list-item
                 v-for="user of members"
