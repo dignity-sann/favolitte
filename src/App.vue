@@ -3,6 +3,7 @@
     <v-navigation-drawer
       v-model="primaryDrawer.model"
       temporary
+      width="300"
       app
     >
       <v-divider></v-divider>
