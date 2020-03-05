@@ -1,6 +1,6 @@
 <template>
   <v-list dense>
-    <v-subheader>Menu</v-subheader>
+    <v-subheader>メニュー</v-subheader>
     <v-list-item
       v-for="(item, index) in filtering()"
       :key="index"
@@ -8,16 +8,12 @@
       link
     >
       <v-list-item-icon>
-        <v-icon>{{ item.icon }}</v-icon>
+        <v-icon v-text="item.icon" />
       </v-list-item-icon>
 
       <v-list-item-content>
-        <v-list-item-title>
-          {{ item.title }}
-        </v-list-item-title>
-        <v-list-item-subtitle>
-          {{ item.description }}
-        </v-list-item-subtitle>
+        <v-list-item-title class="caption" v-text="item.title" />
+        <v-list-item-subtitle class="overline" v-text="item.description" />
       </v-list-item-content>
     </v-list-item>
   </v-list>
@@ -33,29 +29,28 @@ export default Vue.extend({
     menus: [
       {
         title: 'Home',
-        description: 'App home',
         icon: 'home',
         path: '/',
         order: 0
       },
       {
-        title: 'create favlist',
-        description: 'favlist creating',
-        icon: 'create',
+        title: 'イイねウォッチリスト作成',
+        description: '良質ファボをする人のリストを作ります',
+        icon: 'mdi-format-list-bulleted',
         path: '/fav/create',
         order: 20
       },
       {
-        title: 'join favlist',
-        description: 'created favlist join',
-        icon: 'settings',
+        title: 'アクティブリスト設定',
+        description: 'よくみるリストを設定します',
+        icon: 'mdi-arrow-down-bold-outline',
         path: '/fav/join',
         order: 20
       },
       {
-        title: 'watch fav',
-        description: 'fav list watch view',
-        icon: 'list',
+        title: 'リストウォッチ',
+        description: 'アクティブリストの画像をリスト表示',
+        icon: 'mdi-cards-heart',
         path: '/fav/watch',
         order: 30
       },

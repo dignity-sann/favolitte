@@ -3,8 +3,8 @@
     <!-- top section -->
     <v-row>
       <v-col cols="12">
-        <h2>Create Watch FavList</h2>
-        <p class='d-none d-md-flex'>Create groups for monitoring your favorites. Add your favorite users &#x1f389;</p>
+        <h2>イイねウォッチリスト作成</h2>
+        <p class='d-none d-md-flex'>良質ファボをする人のリストを作りましょう&#x1f389;</p>
       </v-col>
     </v-row>
 
@@ -12,16 +12,16 @@
     <v-stepper v-model="currentStep">
       <v-stepper-header>
         <v-stepper-step step="1" editable>
-          Select or Create FavList
+          Select or Create
         </v-stepper-step>
         <v-divider></v-divider>
         <v-stepper-step step="2" :editable="!!(group.id.value) || (!(group.id.value) && currentStep > 2)" :rules="[() => group.valid]">
-          FavList Settings
+          リスト設定
           <small v-if="!group.valid">form input invalid</small>
         </v-stepper-step>
         <v-divider></v-divider>
         <v-stepper-step step="3" :editable="!!(group.id.value)" :rules="[() => group.step3_valid]">
-          FavList Assign Member
+          リストユーザー追加
           <small v-if="!group.step3_valid">user must be more than 1</small>
         </v-stepper-step>
       </v-stepper-header>
@@ -33,13 +33,13 @@
             color="primary"
             @click="createGroup()"
           >
-            Create
+            作成
           </v-btn>
           <div class="mt-4">
             <v-card class="mx-auto" outlined>
               <v-list-item-group color="primary">
                 <v-subheader>
-                  <v-icon class="mr-1">list</v-icon>FavList
+                  <v-icon class="mr-1">list</v-icon>イイねウォッチリスト
                 </v-subheader>
                 <v-list-item
                   v-for="group of groups"
@@ -53,7 +53,7 @@
                     <v-list-item-subtitle v-text="'creater @'.concat(group.creater_screen_name)"/>
                   </v-list-item-content>
                   <v-list-item-action>
-                    <v-btn icon @click="removeConfirm(group.id)">
+                    <v-btn icon @click="removeConfirm(group.id)" v-if="group.creater_id === $store.getters.userTw.data.id_str">
                       <v-icon color="error">mdi-delete</v-icon>
                     </v-btn>
                   </v-list-item-action>
@@ -70,7 +70,7 @@
             lazy-validation
           >
             <v-text-field
-              label="FavList Name"
+              label="リスト名"
               v-model="group.name.value"
               :rules="group.name.rules"
               :counter="group.name.maxLength"
@@ -78,7 +78,7 @@
               required
             ></v-text-field>
             <v-textarea
-              label="Description"
+              label="説明"
               class="mt-2"
               outlined
               v-model="group.desc.value"
@@ -87,7 +87,7 @@
               :counter="group.desc.maxLength"
             ></v-textarea>
             <v-checkbox
-              label="PublicList"
+              label="リスト公開"
               class="ml-2"
               :disabled="group.creater_id.value !== $store.getters.userTw.data.id_str"
               outlined
@@ -100,7 +100,7 @@
               color="primary"
               @click="assignMember()"
             >
-              Assign Member
+              ユーザー追加
             </v-btn>
           </v-form>
         </v-stepper-content>
@@ -142,7 +142,7 @@
             <v-card class="mx-auto" outlined>
               <v-list-item-group color="primary">
                 <v-subheader>
-                  <v-icon class="mr-1">list</v-icon>Members
+                  <v-icon class="mr-1">list</v-icon>ユーザー
                 </v-subheader>
                 <v-list-item
                   v-for="user of group.users"
@@ -170,7 +170,7 @@
               color="primary"
               outlined
               @click="updateGroup()"
-              v-text="`update`"
+              v-text="`更新`"
             />
           </div>
         </v-stepper-content>
@@ -185,9 +185,9 @@
           class="headline"
           primary-title
         >
-          Remove List ?
+          リストを削除しますか？
         </v-card-title>
-        <v-card-text v-text="'Delete list? Deleting cannot be undone!'"/>
+        <v-card-text v-text="'削除すると元に戻せません！'"/>
         <v-divider></v-divider>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -239,8 +239,8 @@ export default {
           value: '',
           maxLength: 20,
           rules: [
-            v => !!v || "FavList Name is required",
-            v => (v && v.length <= 20) || `FavList Name must be less than 20 characters`
+            v => !!v || "required",
+            v => (v && v.length <= 20) || `must be less than 20 characters`
           ],
           error: ''
         },
@@ -296,40 +296,45 @@ export default {
     },
   },
   async mounted () {
-    const firestore = firebase.firestore()
-    let temp = []
-    // get my group
-    await firestore
-      .collection('lists')
-      .where('creater_id', '==', this.$store.getters.userTw.data.id_str)
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {  
-          temp.push(doc.data())
-          temp[temp.length -1].id = doc.id
+    try {
+      this.isLoading = true
+      const firestore = firebase.firestore()
+      let temp = []
+      // get my group
+      await firestore
+        .collection('lists')
+        .where('creater_id', '==', this.$store.getters.userTw.data.id_str)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {  
+            temp.push(doc.data())
+            temp[temp.length -1].id = doc.id
+          })
         })
-      })
-    // get public group
-    await firestore
-      .collection('lists')
-      .where('is_public_list', '==', true)
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {  
-          temp.push(doc.data())
-          temp[temp.length -1].id = doc.id
+      // get public group
+      await firestore
+        .collection('lists')
+        .where('is_public_list', '==', true)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {  
+            temp.push(doc.data())
+            temp[temp.length -1].id = doc.id
+          })
         })
-      })
-    // initial tweet distinct
-    const tmp = temp.reduce((acc, cur, index) => {
-      if (acc.length === 0) {
-        acc.push(cur)
-      } else if (!acc.some(v => v.id === cur.id)) {
-        acc.push(cur)
-      }
-      return acc
-    }, [])
-    this.groups = tmp
+      // initial tweet distinct
+      const tmp = temp.reduce((acc, cur, index) => {
+        if (acc.length === 0) {
+          acc.push(cur)
+        } else if (!acc.some(v => v.id === cur.id)) {
+          acc.push(cur)
+        }
+        return acc
+      }, [])
+      this.groups = tmp
+    } finally {
+      this.isLoading = false
+    } 
   },
   methods: {
     removeConfirm: function (id) {

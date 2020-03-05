@@ -1,6 +1,6 @@
 <template>
   <v-list dense>
-    <v-subheader>Settings</v-subheader>
+    <v-subheader>設定</v-subheader>
     <v-list-item>
       <v-list-item-action>
         <v-checkbox
