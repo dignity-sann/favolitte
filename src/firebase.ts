@@ -1,6 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
+import 'firebase/analytics';
 import store from "./store";
 import axios from "axios";
 
@@ -18,6 +19,7 @@ export default {
     });
     // TODO 下のonAuth()に統合できればSession有効期間も変更可能（現状はログイン時のフックでしか、トークンが取れないので・・・）
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
+    firebase.analytics();
   },
   async signin() {
     const provider = new firebase.auth.TwitterAuthProvider()

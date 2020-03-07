@@ -6,6 +6,7 @@ import store from './store'
 import vuetify from './plugins/vuetify';
 import axios from 'axios'
 import VueAxios from 'vue-axios'
+import VueAnalytics from 'vue-analytics'
 
 import Firebase from './firebase'
 Firebase.init()
@@ -13,15 +14,18 @@ Firebase.init()
 Vue.config.productionTip = false
 Vue.use(VueAxios, axios)
 
-router.beforeEach((to, from, next) => {
+Vue.use(VueAnalytics, {
+  id: process.env.VUE_APP_FIREBASE_MEASUREMENT_ID,
+  router
+})
+
+router.beforeEach(async (to, from, next) => {
   if (to.matched.some(rec => rec.meta.requiresAuth)){
     // 認証必要メニュー
     if (!store.getters.isSignedIn) {
       // ユーザ認証なし
-      Firebase.signin();
-      next({
-        path: '/'
-      })
+      await Firebase.signin();
+      next({path: '/'})
     }
     next()
   } else {

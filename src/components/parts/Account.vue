@@ -76,6 +76,7 @@ export default {
     },
     signout: async function() {
       await firebase.signout();
+      this.$router.push({path: '/'})
       this.$emit('showMessage', {
         message: 'Success.',
         color: 'success'
