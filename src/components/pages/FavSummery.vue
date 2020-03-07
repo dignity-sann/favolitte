@@ -176,9 +176,9 @@ export default {
       .doc(this.$store.getters.userTw.data.id_str)
       .get()
       .then((documentSnapshot) => {
-        documentSnapshot.data().groups.forEach(group => {
+        documentSnapshot.data().list_ids.forEach(id => {
           this.myGroups.push({
-            name: group,
+            id: id,
             state: false
           })
         })
@@ -186,14 +186,13 @@ export default {
 
     // get group inner user
     await firestore
-      .collection('users')
-      .where('groups', 'array-contains-any', this.myGroups.map(v => v.name))
+      .collection('lists')
+      .where('list_id', 'in', this.myGroups.map(v => v.id))
       .get()
       .then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
           const user = {
-            user_id: doc.id,
-            groups: doc.data().groups
+            user_id: doc.id
           }
           this.groupInnerUsers.push(user)
         })
@@ -264,7 +263,7 @@ export default {
       if (this.tweets.length > 0) {
         params.param['max_id'] = this.maxId
       }
-      return axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call/mock`, {
+      return axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
         params: params
       })
     },

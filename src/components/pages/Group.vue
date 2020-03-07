@@ -223,6 +223,9 @@ export default {
       group: {
         valid: true,
         step3_valid: true,
+        list_id: {
+          value: ''
+        },
         creater_id: {
           value: ''
         },
@@ -351,6 +354,7 @@ export default {
       }
       this.group.step3_valid = true
       let pushData = {
+        list_id: this.group.list_id.value,
         name: this.group.name.value,
         desc: this.group.desc.value,
         members: this.group.users.map(v => v.id_str),
@@ -375,9 +379,11 @@ export default {
         await firestore
           .collection('lists')
           .add(pushData)
-          .then(doc => {
-            pushData.id = doc.id
-          })
+          .then(doc => pushData.id = doc.id)
+        await firestore
+          .collection('lists')
+          .doc(pushData.id)
+          .set(pushData)
         this.groups.push(pushData)
       }
       this.$refs.form.reset()
@@ -424,6 +430,7 @@ export default {
       this.group.creater_screen_name.value = group.creater_screen_name
       this.group.creater_profile_image_url.value = group.creater_profile_image_url
       this.group.id.value = group.id
+      this.group.list_id.value = group.id
       this.group.name.value = group.name
       this.group.desc.value = group.desc
       this.group.isPublicList.value = group.is_public_list
@@ -450,6 +457,7 @@ export default {
       this.group.creater_screen_name.value = this.$store.getters.userTw.data.screen_name
       this.group.creater_profile_image_url.value = this.$store.getters.userTw.data.profile_image_url
       this.group.id.value = ''
+      this.group.list_id.value = ''
       this.group.name.value = ''
       this.group.desc.value = ''
       this.group.isPublicList.value = false
