@@ -29,7 +29,7 @@
         >
           <v-img
             v-if="tw.extended_entities.media.length === 1"
-            :src="tw.extended_entities.media[0].media_url"
+            :src="tw.extended_entities.media[0].media_url + '?name=small'"
             class="d-flex"
             height="360"
             @click="showModal(tw.entities.media)"
@@ -53,7 +53,7 @@
               v-for="(media, index) in tw.extended_entities.media" :key="index"
             >
               <v-img
-                :src="media.media_url"
+                :src="media.media_url + '?name=small'"
                 class="d-flex"
                 height="360"
                 @click="showModal(tw.extended_entities.media)"
