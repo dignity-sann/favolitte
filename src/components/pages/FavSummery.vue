@@ -191,17 +191,14 @@ export default {
       .get()
       .then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-          const user = {
-            user_id: doc.id
-          }
-          this.groupInnerUsers.push(user)
+          this.groupInnerUsers.push(...doc.data().members)
         })
       })
 
     // initial group tweet data
     for (const user of this.groupInnerUsers) {
       const param = {
-        user_id: user.user_id,
+        user_id: user,
         count: 40
       }
       await this.fetchDataNoPageNation(param)
