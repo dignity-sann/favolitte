@@ -1,11 +1,12 @@
 <template>
   <v-dialog
     v-model="dialog"
+    scrollable=false
   >
-    <v-card>
       <v-img
         v-if="medias.length === 1"
         :src="medias[0].media_url"
+        contain
       >
         <template v-slot:placeholder>
           <v-row
@@ -26,6 +27,7 @@
         >
           <v-img
             :src="media.media_url"
+            contain
           >
             <template v-slot:placeholder>
               <v-row
@@ -39,7 +41,6 @@
           </v-img>
         </v-carousel-item>
       </v-carousel>
-    </v-card>
   </v-dialog>
 </template>
 

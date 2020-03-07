@@ -29,7 +29,7 @@
         >
           <v-img
             v-if="tw.extended_entities.media.length === 1"
-            :src="tw.extended_entities.media[0].media_url"
+            :src="tw.extended_entities.media[0].media_url + '?name=small'"
             class="d-flex"
             height="360"
             @click="showModal(tw.entities.media)"
@@ -53,7 +53,7 @@
               v-for="(media, index) in tw.extended_entities.media" :key="index"
             >
               <v-img
-                :src="media.media_url"
+                :src="media.media_url + '?name=small'"
                 class="d-flex"
                 height="360"
                 @click="showModal(tw.extended_entities.media)"
@@ -176,9 +176,9 @@ export default {
       .doc(this.$store.getters.userTw.data.id_str)
       .get()
       .then((documentSnapshot) => {
-        documentSnapshot.data().groups.forEach(group => {
+        documentSnapshot.data().list_ids.forEach(id => {
           this.myGroups.push({
-            name: group,
+            id: id,
             state: false
           })
         })
@@ -186,23 +186,19 @@ export default {
 
     // get group inner user
     await firestore
-      .collection('users')
-      .where('groups', 'array-contains-any', this.myGroups.map(v => v.name))
+      .collection('lists')
+      .where('list_id', 'in', this.myGroups.map(v => v.id))
       .get()
       .then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-          const user = {
-            user_id: doc.id,
-            groups: doc.data().groups
-          }
-          this.groupInnerUsers.push(user)
+          this.groupInnerUsers.push(...doc.data().members)
         })
       })
 
     // initial group tweet data
     for (const user of this.groupInnerUsers) {
       const param = {
-        user_id: user.user_id,
+        user_id: user,
         count: 40
       }
       await this.fetchDataNoPageNation(param)
@@ -264,7 +260,7 @@ export default {
       if (this.tweets.length > 0) {
         params.param['max_id'] = this.maxId
       }
-      return axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call/mock`, {
+      return axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
         params: params
       })
     },
