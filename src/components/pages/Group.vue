@@ -140,7 +140,7 @@
           </div>
           <div class="mt-2">
             <v-card class="mx-auto" outlined>
-              <v-list-item-group color="primary">
+              <v-list>
                 <v-subheader>
                   <v-icon class="mr-1">list</v-icon>ユーザー
                 </v-subheader>
@@ -163,7 +163,7 @@
                     </v-btn>
                   </v-list-item-action>
                 </v-list-item>
-              </v-list-item-group>
+              </v-list>
             </v-card>
             <v-btn
               class="mt-4"
@@ -375,6 +375,7 @@ export default {
         this.groups.find(v => v.id === this.group.id.value).name = pushData.name
         this.groups.find(v => v.id === this.group.id.value).desc = pushData.desc
         this.groups.find(v => v.id === this.group.id.value).isPublicList = pushData.is_public_list
+        this.groups.find(v => v.id === this.group.id.value).members = pushData.members
       } else {
         await firestore
           .collection('lists')

@@ -8,18 +8,11 @@
       </v-col>
     </v-row>
 
-    <v-btn
-      outlined
-      color="primary"
-      @click="updateList()"
-    >
-      更新
-    </v-btn>
     <v-row>
       <v-col cols='6'>
-        <div class="mt-4">
+        <div>
           <v-card class="mx-auto" outlined>
-            <v-list-item-group color="primary">
+            <v-list>
               <v-subheader>
                 <v-icon class="mr-1">list</v-icon>選択可能なイイねウォッチリスト
               </v-subheader>
@@ -45,15 +38,15 @@
                   </v-row>
                 </v-list-item-action>
               </v-list-item>
-            </v-list-item-group>
+            </v-list>
           </v-card>
         </div>
       </v-col>
 
       <v-col cols='6'>
-        <div class="mt-4">
+        <div>
           <v-card class="mx-auto" outlined>
-            <v-list-item-group color="primary">
+            <v-list>
               <v-subheader>
                 <v-icon class="mr-1">list</v-icon>アクティブイイねウォッチリスト
               </v-subheader>
@@ -79,17 +72,19 @@
                   </v-row>
                 </v-list-item-action>
               </v-list-item>
-            </v-list-item-group>
+            </v-list>
           </v-card>
         </div>
       </v-col>
+
       <v-col cols="12">
         <div class="mt-2">
           <v-card class="mx-auto" outlined>
-            <v-list-item-group color="primary">
+            <v-list>
               <v-subheader>
                 <v-icon class="mr-1">list</v-icon>リスト内のユーザー
               </v-subheader>
+
               <v-list-item
                 v-for="user of members"
                 :key="user.id_str"
@@ -103,7 +98,7 @@
                   <v-list-item-subtitle v-text="'@'.concat(user.screen_name)"></v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
-            </v-list-item-group>
+            </v-list>
           </v-card>
         </div>
       </v-col>
@@ -202,9 +197,11 @@ export default {
         return false
       }
       this.joinGroups.push(group)
+      this.updateList()
     },
     removedList: function (group) {
       this.joinGroups.splice(this.joinGroups.findIndex(v => v.id === group.id), 1)
+      this.updateList()
     },
     refMember: async function (group) {
       this.isLoading = true
@@ -223,13 +220,6 @@ export default {
       }
     },
     updateList: async function() {
-      if (this.joinGroups.length <= 0) {
-        this.$emit('showMessage', {
-          message: 'list must be more than 1.',
-          color: 'error'
-        })
-        return false
-      }
       let pushData = {
         list_ids: this.joinGroups.map(v => v.id)
       }
