@@ -360,5 +360,7 @@ export default {
 </script>
 
 <style scoped>
-
+.v-dialog {
+  box-shadow: none;
+}
 </style>
