@@ -1,22 +1,20 @@
 <template>
   <div>
-    <v-row justify="space-around" align="center">
-      <v-col cols="12">
-        <v-chip
-          v-for="(group, index) in myGroups"
-          :key="index"
-          :input-value="group.state"
-          color="primary"
-          class="ma-2"
-          filter
-          filter-icon="mdi-minus"
-          @click="() => group.state = !group.state"
+    <v-row>
+      <v-tabs
+        v-model="tab"
+        background-color="blue lighten-4"
+        grow
+      >
+        <v-tab
+          v-for="list in myLists"
+          :key="list.list_id"
+          @click="listChanged(list.list_id)"
         >
-          {{ group.name }}
-        </v-chip>
-      </v-col>
+          {{ list.name }}
+        </v-tab>
+      </v-tabs>
     </v-row>
-    <v-divider></v-divider>
     <v-row v-if="!isLoading">
       <v-col
         lg='2' md='3' sm='6' xs='12'
@@ -109,31 +107,29 @@
                 <v-btn
                   icon
                   @click="doPushFav(tw.id_str, myFavs.some(v => v === tw.id_str))"
-                  :color="myFavs.some(v => v === tw.id_str) ? 'pink' : ''"
+                  :color="myFavs.some(v => v === tw.id_str) ? 'yellow' : ''"
                 >
                   <v-icon
                     small
                   >
-                    mdi-heart
+                    mdi-star
                   </v-icon>
                 </v-btn>
                 <span class="caption mr-2" v-text="tw.favorite_count"></span>
-                <!-- <span class="mr-1"></span>
+                <span class="mr-1"></span>
                 <v-btn icon @click="doPushRetweet(tw.id_str)">
                   <v-icon
-                    class="mr-1"
                     small
                   >
                     mdi-twitter-retweet
                   </v-icon>
                 </v-btn>
-                <span class="caption" v-text="tw.retweet_count"></span> -->
+                <span class="caption" v-text="tw.retweet_count"></span>
               </v-row>
             </v-list-item>
           </v-card-actions>
         </v-card>
       </v-col>
-      <infinite-loading v-if="isPageNation" @infinite="infiniteHandler"></infinite-loading>
     </v-row>
     <OriginalImageDialog ref="modal"></OriginalImageDialog>
     <v-overlay :value="isLoading">
@@ -144,127 +140,162 @@
 
 <script>
 import axios from "axios";
-import InfiniteLoading from 'vue-infinite-loading';
 import firebase from '@/firebase.ts'
 import OriginalImageDialog from '@/components/parts/OriginalImageDialog.vue';
 
 export default {
   name: 'FavSummery',
   components: {
-    InfiniteLoading,
-    OriginalImageDialog,
+    OriginalImageDialog
   },
   data() {
     return {
-      userIds: [],
-      myGroups: [],
+      tab: '',
+      activeList: '',
+      myLists: [],
       myFavs: [],
-      groupInnerUsers:[],
       tweets: [],
-      show: false,
-      maxId: null,
-      isPageNation: false,
       isLoading: true
     };
   },
   async mounted() {
     this.isLoading = true
-    const firestore = firebase.firestore()
-    // get my group 
-    await firestore
-      .collection('users')
-      .doc(this.$store.getters.userTw.data.id_str)
-      .get()
-      .then((documentSnapshot) => {
-        documentSnapshot.data().list_ids.forEach(id => {
-          this.myGroups.push({
-            id: id,
-            state: false
+    try {
+      const firestore = firebase.firestore()
+      // get my listids
+      let myListids = []
+      await firestore
+        .collection('users')
+        .doc(this.$store.getters.userTw.data.id_str)
+        .get()
+        .then((documentSnapshot) => {
+          myListids = documentSnapshot.data().list_ids
+        })
+      if (myListids.length <= 0){
+        this.$emit('showMessage', {
+          message: 'acctive watch List empty.',
+          color: 'error'
+        })
+        return false
+      }
+
+      // get my groups
+      await firestore
+        .collection('lists')
+        .where('list_id', 'in', myListids)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            this.myLists.push(doc.data())
           })
         })
-      })
-
-    // get group inner user
-    await firestore
-      .collection('lists')
-      .where('list_id', 'in', this.myGroups.map(v => v.id))
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          this.groupInnerUsers.push(...doc.data().members)
+      if (this.myLists.length <= 0){
+        this.$emit('showMessage', {
+          message: 'Favorite List not found. ',
+          color: 'error'
         })
-      })
+        return false
+      }
 
-    // initial group tweet data
-    for (const user of this.groupInnerUsers) {
+      // first get
+      this.activeList = this.myLists.find(() => true)
+      this.tab = this.activeList.list_is
+      // initial group tweet data
+      for (const member of this.activeList.members) {
+        if (!member) {
+          continue
+        }
+        const param = {
+          user_id: member,
+          count: 40
+        }
+        await this.fetchDataNoPageNation(param)
+          .then((res) => {
+            this.tweets.push(...res.data);
+          })
+      }
+      // initial tweet distinct
+      const tmp = this.tweets.reduce((acc, cur, index) => {
+        if (acc.length === 0) {
+          acc.push(cur)
+        } else if (!acc.some(v => v.id_str === cur.id_str)) {
+          acc.push(cur)
+        }
+        return acc
+      }, [])
+      this.tweets = tmp
+      // initial group tweet tweetid min, max
+      const min = this.tweets.reduce((a, b) => a.id > b.id ? b : a).id_str
+      const max = this.tweets.reduce((a, b) => a.id > b.id ? a : b).id_str
+      // my tweet data
       const param = {
-        user_id: user,
-        count: 40
+        user_id: this.$store.getters.userTw.data.id_str,
+        since_id: min,
+        max_id: max,
+        count: 200
       }
       await this.fetchDataNoPageNation(param)
         .then((res) => {
-          this.tweets.push(...res.data);
+          this.myFavs.push(...res.data.map(v => v.id_str));
         })
-    }
-
-    // initial tweet distinct
-    const tmp = this.tweets.reduce((acc, cur, index) => {
-      if (acc.length === 0) {
-        acc.push(cur)
-      } else if (!acc.some(v => v.id_str === cur.id_str)) {
-        acc.push(cur)
-      }
-      return acc
-    }, [])
-    this.tweets = tmp
-
-    // initial group tweet tweetid min, max
-    const min = this.tweets.reduce((a, b) => a.id > b.id ? b : a).id_str
-    const max = this.tweets.reduce((a, b) => a.id > b.id ? a : b).id_str
-
-    // my tweet data
-    const param = {
-      user_id: this.$store.getters.userTw.data.id_str,
-      since_id: min,
-      max_id: max,
-      count: 200
-    }
-    await this.fetchDataNoPageNation(param)
-      .then((res) => {
-        this.myFavs.push(...res.data.map(v => v.id_str));
-      })
-    this.isLoading = false
+    } finally {
+      this.isLoading = false
+    } 
   },
   methods: {
-    infiniteHandler($state) {
-      this.fetchData(this.$store.getters.userTw.data.id_str)
-        .then((res) => {
-          this.maxId = res.data[res.data.length - 1].id
-          res.data.pop
-          this.tweets.push(...res.data);
-          $state.loaded();
-        })
-    },
-    async fetchData(userId) {
-      const count = 50
-      let params = {
-          endpoint: "favorites/list",
-          access_token: this.$store.getters.userTwAcessToken,
-          token_secret: this.$store.getters.userTwTokenSecret,
-          param: {
-            user_id: screenName,
-            count: count + 1
+    async listChanged(listId) {
+      try {
+        if (this.activeList.list_id === listId) {
+          return false
+        }
+        // active get
+        this.activeList = this.myLists.find(v => v.list_id === listId)
+        this.isLoading = true
+        this.myFavs = []
+        this.tweets = []
+        // initial group tweet data
+        for (const member of this.activeList.members) {
+          if (!member) {
+            continue
           }
-      }
-      // すでにデータが存在
-      if (this.tweets.length > 0) {
-        params.param['max_id'] = this.maxId
-      }
-      return axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
-        params: params
-      })
+          const param = {
+            user_id: member,
+            count: 40
+          }
+          await this.fetchDataNoPageNation(param)
+            .then((res) => {
+              this.tweets.push(...res.data);
+            })
+        }
+        // initial tweet distinct
+        const tmp = this.tweets.reduce((acc, cur, index) => {
+          if (acc.length === 0) {
+            acc.push(cur)
+          } else if (!acc.some(v => v.id_str === cur.id_str)) {
+            acc.push(cur)
+          }
+          return acc
+        }, [])
+        this.tweets = tmp
+        // initial group tweet tweetid min, max
+        const min = this.tweets.reduce((a, b) => a.id > b.id ? b : a).id_str
+        const max = this.tweets.reduce((a, b) => a.id > b.id ? a : b).id_str
+        // my tweet data
+        const param = {
+          user_id: this.$store.getters.userTw.data.id_str,
+          since_id: min,
+          max_id: max,
+          count: 200
+        }
+        await this.fetchDataNoPageNation(param)
+          .then((res) => {
+            this.myFavs.push(...res.data.map(v => v.id_str));
+          })
+      } finally {
+        this.isLoading = false
+      } 
     },
-   async fetchDataNoPageNation(param) {
+    async fetchDataNoPageNation(param) {
       let params = {
           endpoint: "favorites/list",
           access_token: this.$store.getters.userTwAcessToken,
@@ -321,15 +352,13 @@ export default {
         })
       }
     },
-    // async doPushRetweet(tweetId) {
-    //   console.log(`doPushRetweet tweetid => ${tweetId}`)
-    // },
+    async doPushRetweet(tweetId) {
+      console.log(`doPushRetweet tweetid => ${tweetId}`)
+    },
   }
 };
 </script>
 
 <style scoped>
-.tw-card {
-  margin-top: 4px;
-}
+
 </style>

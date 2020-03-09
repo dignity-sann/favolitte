@@ -380,7 +380,7 @@ export default {
         await firestore
           .collection('lists')
           .add(pushData)
-          .then(doc => pushData.id = doc.id)
+          .then(doc => pushData.list_id = doc.id)
         await firestore
           .collection('lists')
           .doc(pushData.id)
