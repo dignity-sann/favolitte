@@ -109,25 +109,24 @@
                 <v-btn
                   icon
                   @click="doPushFav(tw.id_str, myFavs.some(v => v === tw.id_str))"
-                  :color="myFavs.some(v => v === tw.id_str) ? 'pink' : ''"
+                  :color="myFavs.some(v => v === tw.id_str) ? 'yellow' : ''"
                 >
                   <v-icon
                     small
                   >
-                    mdi-heart
+                    mdi-star
                   </v-icon>
                 </v-btn>
                 <span class="caption mr-2" v-text="tw.favorite_count"></span>
-                <!-- <span class="mr-1"></span>
+                <span class="mr-1"></span>
                 <v-btn icon @click="doPushRetweet(tw.id_str)">
                   <v-icon
-                    class="mr-1"
                     small
                   >
                     mdi-twitter-retweet
                   </v-icon>
                 </v-btn>
-                <span class="caption" v-text="tw.retweet_count"></span> -->
+                <span class="caption" v-text="tw.retweet_count"></span>
               </v-row>
             </v-list-item>
           </v-card-actions>
@@ -183,7 +182,6 @@ export default {
           })
         })
       })
-
     // get group inner user
     await firestore
       .collection('lists')
@@ -194,7 +192,6 @@ export default {
           this.groupInnerUsers.push(...doc.data().members)
         })
       })
-
     // initial group tweet data
     for (const user of this.groupInnerUsers) {
       const param = {
@@ -206,7 +203,6 @@ export default {
           this.tweets.push(...res.data);
         })
     }
-
     // initial tweet distinct
     const tmp = this.tweets.reduce((acc, cur, index) => {
       if (acc.length === 0) {
@@ -217,11 +213,9 @@ export default {
       return acc
     }, [])
     this.tweets = tmp
-
     // initial group tweet tweetid min, max
     const min = this.tweets.reduce((a, b) => a.id > b.id ? b : a).id_str
     const max = this.tweets.reduce((a, b) => a.id > b.id ? a : b).id_str
-
     // my tweet data
     const param = {
       user_id: this.$store.getters.userTw.data.id_str,
@@ -321,15 +315,15 @@ export default {
         })
       }
     },
-    // async doPushRetweet(tweetId) {
-    //   console.log(`doPushRetweet tweetid => ${tweetId}`)
-    // },
+    async doPushRetweet(tweetId) {
+      console.log(`doPushRetweet tweetid => ${tweetId}`)
+    },
   }
 };
 </script>
 
 <style scoped>
-.tw-card {
-  margin-top: 4px;
+.v-dialog {
+  box-shadow: none;
 }
 </style>
