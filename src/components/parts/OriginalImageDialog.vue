@@ -1,7 +1,8 @@
 <template>
   <v-dialog
     v-model="dialog"
-    scrollable=false
+    scrollable
+    style="box-shadow: none;"
   >
       <v-img
         v-if="medias.length === 1"
@@ -60,3 +61,7 @@
     }
   }
 </script>
+
+<style scoped>
+
+</style>
