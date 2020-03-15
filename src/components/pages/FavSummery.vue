@@ -205,6 +205,9 @@ export default {
         if (!member) {
           continue
         }
+        if (member === this.$store.getters.userTw.data.id_str) {
+          continue
+        }
         const param = {
           user_id: member,
           count: 40
@@ -256,6 +259,9 @@ export default {
         // initial group tweet data
         for (const member of this.activeList.members) {
           if (!member) {
+            continue
+          }
+          if (member === this.$store.getters.userTw.data.id_str) {
             continue
           }
           const param = {
