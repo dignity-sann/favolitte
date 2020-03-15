@@ -9,7 +9,7 @@
     </v-row>
 
     <v-row>
-      <v-col cols='6'>
+      <v-col sm="12" md="6" lg="6">
         <div>
           <v-card class="mx-auto" outlined>
             <v-list>
@@ -43,7 +43,7 @@
         </div>
       </v-col>
 
-      <v-col cols='6'>
+      <v-col sm="12" md="6" lg="6">
         <div>
           <v-card class="mx-auto" outlined>
             <v-list>
