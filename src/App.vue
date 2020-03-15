@@ -18,7 +18,9 @@
       <v-app-bar-nav-icon
         @click.stop="primaryDrawer.model = !primaryDrawer.model"
       />
-      <v-toolbar-title>favolitte</v-toolbar-title>
+      <v-toolbar-title>
+        <router-link tag="span" to="/">favolitte</router-link>
+      </v-toolbar-title>
       <v-spacer></v-spacer>
       <Account
         @showMessage="showMessage"

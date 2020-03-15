@@ -25,9 +25,26 @@ router.beforeEach(async (to, from, next) => {
     if (!store.getters.isSignedIn) {
       // ユーザ認証なし
       await Firebase.signin();
-      next({path: '/'})
+      const unwatch = store.watch(
+        (state, getters) => {
+          return state.status
+        },
+        (newVal, oldVal) => {
+          if (newVal) {
+            // 全て取得完了後に遷移先へ
+            next({path: to.path})
+          }
+        }
+      )
+      // とりあえずTOPに戻す
+      if (from.path !== '/') {
+        next({path: '/'})
+      } else {
+        next()
+      }
+    } else {
+      next()
     }
-    next()
   } else {
     // 認証不要メニュー
     next()
