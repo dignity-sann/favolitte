@@ -38,13 +38,12 @@ export default {
     firebase.auth().onAuthStateChanged(async user => {
       if (!user) {
         store.commit('onAuthStateChanged', null);
-        store.commit('onUserStatusChanged', false);
         store.commit('onUserTwChanged', null);
         store.commit('onUserTwAcessTokenChanged', '');
         store.commit('onUserTwTokenSecretChanged', '');
+        store.commit('onUserStatusChanged', false);
       } else {
         store.commit('onAuthStateChanged', user);
-        store.commit('onUserStatusChanged', true);
         if (user.providerData.length > 0) {
           const userInfo: (firebase.UserInfo | null) = user.providerData[0]
           let uid = ''
@@ -65,6 +64,7 @@ export default {
         } else {
           store.commit('onUserTwChanged', null);
         }
+        store.commit('onUserStatusChanged', true);
       }
     });
   },

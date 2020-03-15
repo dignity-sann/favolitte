@@ -36,7 +36,7 @@
           </v-list-item>
           <v-list-item v-else>
             <v-list-item-content>
-              <v-list-item-title>Sign in required</v-list-item-title>
+              <v-list-item-title>サインインが必要です</v-list-item-title>
             </v-list-item-content>
           </v-list-item> 
         </v-list>
@@ -69,16 +69,25 @@ export default {
   methods: {
     signin: async function () {
       await firebase.signin();
-      this.$emit('showMessage', {
-        message: 'Success.',
-        color: 'success'
-      })
+      const unwatch = this.$store.watch(
+        (state, getters) => {
+          return state.status
+        },
+        (newVal, oldVal) => {
+          if (newVal) {
+            this.$emit('showMessage', {
+              message: 'サインインしました',
+              color: 'success'
+            })
+          } 
+        }
+      )
     },
     signout: async function() {
       await firebase.signout();
       this.$router.push({path: '/'})
       this.$emit('showMessage', {
-        message: 'Success.',
+        message: 'サインアウトしました',
         color: 'success'
       })
     },
