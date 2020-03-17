@@ -17,21 +17,36 @@ export default {
       appId: process.env.VUE_APP_FIREBASE_APP_ID,
       measurementId: process.env.VUE_APP_FIREBASE_MEASUREMENT_ID
     });
-    // TODO 下のonAuth()に統合できればSession有効期間も変更可能（現状はログイン時のフックでしか、トークンが取れないので・・・）
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
     firebase.analytics();
   },
   async signin() {
     const provider = new firebase.auth.TwitterAuthProvider()
-    firebase.auth().signInWithPopup(provider).then(function(result: any) {
+    firebase.auth().signInWithPopup(provider).then(async function(result: any) {
       if (result.credential) {
-        // TODO これいやです。onAuth()に統合したい
-        store.commit('onUserTwAcessTokenChanged', result.credential.accessToken);
-        store.commit('onUserTwTokenSecretChanged', result.credential.secret);
+        const firestore = firebase.firestore()
+        firestore
+          .collection('platform_users')
+          .doc(result.user.uid)
+          .set({
+            access_token: result.credential.accessToken,
+            token_secret: result.credential.secret
+          })
       }
     });
   },
   async signout() {
+    const firestore = firebase.firestore()
+    const user: (firebase.UserInfo | null) = firebase.auth().currentUser
+    if (user) {
+      await firestore
+        .collection('platform_users')
+        .doc(user.uid)
+        .set({
+          access_token: '',
+          token_secret: ''
+        })
+    }
     firebase.auth().signOut()
   },
   onAuth() {
@@ -43,8 +58,18 @@ export default {
         store.commit('onUserTwTokenSecretChanged', '');
         store.commit('onUserStatusChanged', false);
       } else {
+        const firestore = firebase.firestore()
+        let firebaseUserinfo: any
+        await firestore
+          .collection('platform_users')
+          .doc(user.uid)
+          .get()
+          .then((documentSnapshot) => {
+            firebaseUserinfo = documentSnapshot.data()
+          })
         store.commit('onAuthStateChanged', user);
-        if (user.providerData.length > 0) {
+        store.commit('onUserStatusChanged', true);
+        if (user.providerData.length > 0) {  
           const userInfo: (firebase.UserInfo | null) = user.providerData[0]
           let uid = ''
           if (userInfo !== null) {
@@ -52,19 +77,18 @@ export default {
           }
           const twuser: any = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/twitter/api/call`, {
             params: {
-              access_token: store.getters.userTwAcessToken,
-              token_secret: store.getters.userTwTokenSecret,    
+              access_token: firebaseUserinfo.access_token,
+              token_secret: firebaseUserinfo.token_secret,    
               endpoint: 'users/show',
               param: {
                 user_id: uid
               }
             }
           })
+          store.commit('onUserTwAcessTokenChanged', firebaseUserinfo.access_token);
+          store.commit('onUserTwTokenSecretChanged', firebaseUserinfo.token_secret);  
           store.commit('onUserTwChanged', twuser);
-        } else {
-          store.commit('onUserTwChanged', null);
         }
-        store.commit('onUserStatusChanged', true);
       }
     });
   },
