@@ -23,15 +23,19 @@
 
       <v-card>
         <v-list>
-          <v-list-item v-if="$store.getters.isSignedIn && $store.getters.userTw.data">
+          <v-list-item v-if="$store.getters.isSignedIn && $store.getters.userTw">
             <v-list-item-avatar>
               <img
                 :src="$store.getters.userTw.data.profile_image_url"
               >
             </v-list-item-avatar>
             <v-list-item-content>
-              <v-list-item-title>{{ $store.getters.userTw.data.name }}</v-list-item-title>
-              <v-list-item-subtitle>{{ '@'.concat($store.getters.userTw.data.screen_name) }}</v-list-item-subtitle>
+              <v-list-item-title
+                v-text="$store.getters.userTw.data.name"
+              />
+              <v-list-item-subtitle
+                v-text="'@'.concat($store.getters.userTw.data.screen_name)"
+              />
             </v-list-item-content>
           </v-list-item>
           <v-list-item v-else>
@@ -85,7 +89,9 @@ export default {
     },
     signout: async function() {
       await firebase.signout();
-      this.$router.push({path: '/'})
+      if (this.$router.currentRoute.path !== '/') {
+        this.$router.push({path: '/'})
+      }
       this.$emit('showMessage', {
         message: 'サインアウトしました',
         color: 'success'
