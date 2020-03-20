@@ -383,7 +383,7 @@ export default {
           .then(doc => pushData.list_id = doc.id)
         await firestore
           .collection('lists')
-          .doc(pushData.id)
+          .doc(pushData.list_id)
           .set(pushData)
         this.groups.push(pushData)
       }
