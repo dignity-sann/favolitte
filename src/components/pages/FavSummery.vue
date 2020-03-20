@@ -15,6 +15,20 @@
         </v-tab>
       </v-tabs>
     </v-row>
+    <v-row v-if="isLoading">
+      <v-col
+        lg='2' md='3' sm='6' xs='12'
+        v-for="(i) in 15"
+        class="d-flex child-flex"
+        :key="i"
+      >
+      <v-skeleton-loader
+        class="mx-auto"
+        type="card-avatar"
+        max-height="530"
+      ></v-skeleton-loader>
+      </v-col>
+    </v-row>
     <v-row v-if="!isLoading">
       <v-col
         lg='2' md='3' sm='6' xs='12'
@@ -33,13 +47,11 @@
             @click="showModal(tw.entities.media)"
           >
             <template v-slot:placeholder>
-              <v-row
-                class="fill-height ma-0"
-                align="center"
-                justify="center"
-              >
-                <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
-              </v-row>
+              <v-skeleton-loader
+                type="image"
+                height="360"
+                class="d-flex"
+              ></v-skeleton-loader>
             </template>
           </v-img>
           <v-carousel
@@ -57,13 +69,11 @@
                 @click="showModal(tw.extended_entities.media)"
               >
                 <template v-slot:placeholder>
-                  <v-row
-                    class="fill-height ma-0"
-                    align="center"
-                    justify="center"
-                  >
-                    <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
-                  </v-row>
+                  <v-skeleton-loader
+                    type="image"
+                    height="360"
+                    class="d-flex"
+                  ></v-skeleton-loader>
                 </template>
               </v-img>
             </v-carousel-item>
@@ -132,9 +142,6 @@
       </v-col>
     </v-row>
     <OriginalImageDialog ref="modal"></OriginalImageDialog>
-    <v-overlay :value="isLoading">
-      <v-progress-circular indeterminate size="64"></v-progress-circular>
-    </v-overlay>
   </div>
 </template>
 
@@ -155,7 +162,8 @@ export default {
       myLists: [],
       myFavs: [],
       tweets: [],
-      isLoading: true
+      tabCache: [],
+      isLoading: true,
     };
   },
   async mounted() {
@@ -199,8 +207,9 @@ export default {
 
       // first get
       this.activeList = this.myLists.find(() => true)
-      this.tab = this.activeList.list_is
+      this.tab = this.activeList.list_id
       // initial group tweet data
+      let tweetData = []
       for (const member of this.activeList.members) {
         if (!member) {
           continue
@@ -214,11 +223,11 @@ export default {
         }
         await this.fetchDataNoPageNation(param)
           .then((res) => {
-            this.tweets.push(...res.data);
+            tweetData.push(...res.data);
           })
       }
       // initial tweet distinct
-      const tmp = this.tweets.reduce((acc, cur, index) => {
+      const tmp = tweetData.reduce((acc, cur, index) => {
         if (acc.length === 0) {
           acc.push(cur)
         } else if (!acc.some(v => v.id_str === cur.id_str)) {
@@ -227,6 +236,11 @@ export default {
         return acc
       }, [])
       this.tweets = tmp
+      // cache
+      this.tabCache.push({
+        tab: this.activeList.list_id,
+        data: this.tweets
+      })
       // initial group tweet tweetid min, max
       const min = this.tweets.reduce((a, b) => a.id > b.id ? b : a).id_str
       const max = this.tweets.reduce((a, b) => a.id > b.id ? a : b).id_str
@@ -237,7 +251,7 @@ export default {
         max_id: max,
         count: 200
       }
-      await this.fetchDataNoPageNation(param)
+      this.fetchDataNoPageNation(param)
         .then((res) => {
           this.myFavs.push(...res.data.map(v => v.id_str));
         })
@@ -251,12 +265,18 @@ export default {
         if (this.activeList.list_id === listId) {
           return false
         }
+        if (this.tabCache.some(v => v.tab === listId)) {
+          this.activeList = this.myLists.find(v => v.list_id === listId)
+          this.tweets = this.tabCache.find(v => v.tab === listId).data
+          return true
+        }
         // active get
         this.activeList = this.myLists.find(v => v.list_id === listId)
         this.isLoading = true
         this.myFavs = []
         this.tweets = []
         // initial group tweet data
+        let tweetData = []
         for (const member of this.activeList.members) {
           if (!member) {
             continue
@@ -270,11 +290,11 @@ export default {
           }
           await this.fetchDataNoPageNation(param)
             .then((res) => {
-              this.tweets.push(...res.data);
+              tweetData.push(...res.data);
             })
         }
         // initial tweet distinct
-        const tmp = this.tweets.reduce((acc, cur, index) => {
+        const tmp = tweetData.reduce((acc, cur, index) => {
           if (acc.length === 0) {
             acc.push(cur)
           } else if (!acc.some(v => v.id_str === cur.id_str)) {
@@ -283,6 +303,11 @@ export default {
           return acc
         }, [])
         this.tweets = tmp
+        // cache
+        this.tabCache.push({
+          tab: this.activeList.list_id,
+          data: this.tweets
+        })
         // initial group tweet tweetid min, max
         const min = this.tweets.reduce((a, b) => a.id > b.id ? b : a).id_str
         const max = this.tweets.reduce((a, b) => a.id > b.id ? a : b).id_str
